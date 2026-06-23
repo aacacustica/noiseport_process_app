@@ -1,0 +1,4 @@
+devices:
+  - id: P6_TEST_AUTOMATIZE
+    microphone_id: RPI_6
+    enabled: true

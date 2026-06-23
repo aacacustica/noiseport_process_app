@@ -1,0 +1,22 @@
+paths:
+  repo: /home/aac/I+D/CODIGOS/NoisePort_server
+  inbox: /srv/services/inbox
+  measurements: /srv/contenedores/CONTENEDORES/CONTENEDORES/3-Medidas
+  results: /srv/contenedores/CONTENEDORES/CONTENEDORES/5-Resultados
+  logs: /var/log/noiseport-server
+
+paths_output_propuesta:
+  inbox: /srv/noiseport/inbox
+  measurements: /srv/noiseport/measurements
+  results: /srv/noiseport/results
+  logs: /srv/noiseport/logs
+
+conda:
+  env_name: s3_env
+
+pipeline:
+  enabled_steps:
+    - queries
+    - peaks
+    - alarms
+    - visualizations
