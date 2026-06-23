@@ -1,12 +1,12 @@
 import os
 import boto3
 import pandas as pd
-import re
-from logging_config import setup_logging
-from config import *
+
 from tqdm import tqdm
 import datetime
 
+from server_process_app.common import logging_config
+from server_process_app.common import config
 
 HOME_DIR = os.getenv("HOME")
 
@@ -157,7 +157,7 @@ def download_new_files(bucket_name, home_dir, logger, downloaded_list='downloade
 def main():
     # initialize logger
 
-    logger = setup_logging('retrive_data')
+    logger = logging_config.setup_logging('retrive_data')
     
     download_new_files(BUCKET_NAME, HOME_DIR,logger)
     

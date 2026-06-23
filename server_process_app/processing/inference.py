@@ -17,9 +17,12 @@ from . import yamnet as yamnet_model
 
 import warnings
 
-from utils import *
-from logging_config import setup_logging
 from collections import defaultdict
+
+from server_process_app.common.logging_config import *
+from server_process_app.common.utils import *
+from server_process_app.common import inference_params as yamnet_params
+from server_process_app.common import yamnet as yamnet_model
 
 warnings.filterwarnings("ignore", 
                         message="FNV hashing is not implemented in Numba",

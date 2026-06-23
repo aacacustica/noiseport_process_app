@@ -1,17 +1,12 @@
 import sys
-sys.path.insert(0, "/home/aac/I+D/CODIGOS/NoisePort_server/")
 import argparse
 import os
-from logging_config import setup_logging
-from config_vi import *
-from utils import *
-import config_vi
 import sys
 
-sys.path.insert(0, "/home/aac/I+D/CODIGOS/NoisePort_server/06_visualization")
-from processing import *
-import re
-
+from server_process_app.common.logging_config import *
+from server_process_app.common.config_vi import *
+from server_process_app.common.utils import *
+from server_process_app.common.processing_visualizations import *
 
 COEFFS_PATH = "/home/aac/I+D/CODIGOS/NoisePort_server/point_coeffs.json"
 

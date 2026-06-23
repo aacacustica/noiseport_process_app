@@ -6,21 +6,18 @@ from pathlib import Path
 import os
 import argparse
 import logging
-import sys
-import time
+
 import re
 
-sys.path.insert(0, "/home/aac/I+D/CODIGOS/NoisePort_server/05_peak")
-sys.path.insert(0, "/home/aac/I+D/CODIGOS/NoisePort_server/")
 
-from logging_config import *
-from config_peak import *
 from scipy.signal import find_peaks
-from collections import defaultdict
 from tqdm import tqdm
 from config import *
-from config_peak import *
-from utils import *
+
+
+from server_process_app.common.logging_config import *
+from server_process_app.common.config_peak import *
+from server_process_app.common.utils import *
 
 
 logging.basicConfig(level=logging.INFO, 

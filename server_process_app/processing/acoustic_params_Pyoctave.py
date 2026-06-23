@@ -1,7 +1,6 @@
 import os
 import pandas as pd
 import datetime
-import time
 import numpy as np
 import pandas as pd
 import argparse
@@ -12,12 +11,15 @@ import json
 
 import soundfile as sf
 from pyfilterbank.splweighting import a_weighting_coeffs_design, c_weighting_coeffs_design
-from utils import *
-from config import *
 from scipy.signal import lfilter
 
-from logging_config import setup_logging
-from PyOctaveBand import *
+
+
+from server_process_app.common.logging_config import *
+from server_process_app.common.pyoctaveband import *
+from server_process_app.common.utils import *
+from server_process_app.common.config import *
+
 
 
 def twenty_db_fix(levels):

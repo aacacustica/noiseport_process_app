@@ -6,15 +6,14 @@ import time
 import sys
 import argparse
 
-sys.path.insert(0, "/home/aac/I+D/CODIGOS/NoisePort_server/04_queries")
-
-from processing import *
-from logging_config import *
-from utils import *
+from Proyectos.noiseport_process_app.server_process_app.common.processing_queries import *
 from config import *
-from utils_queries import *
-from time_slop_fix import *
 
+from server_process_app.common.utils_queries import *
+from server_process_app.common.time_slop_fix import *
+from server_process_app.common.logging_config import *
+from server_process_app.common.utils import *
+from server_process_app.common.processing import *
 
 PATH = SANDISK_PATH_LINUX_NEW
 ISDIR = os.path.isdir(PATH)

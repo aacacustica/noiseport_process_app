@@ -1,0 +1,6 @@
+WINDOW_SIZE = 30  # seconds
+PROMINENCE = 1
+WIDTH = 1
+TOP_PREDIC = 3
+ADDING_THRESHOLD = 10  # seconds
+
