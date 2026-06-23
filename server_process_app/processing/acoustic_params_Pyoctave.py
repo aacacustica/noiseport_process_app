@@ -21,6 +21,10 @@ from server_process_app.common.utils import *
 from server_process_app.common.settings import settings
 
 
+config = load_config()
+
+CALIBRATION_CONSTANTS = config['']
+ID_MICROPHONE = config['']
 
 def twenty_db_fix(levels):
     levels_fix = []
@@ -512,10 +516,7 @@ def main():
             #-------------------------------
                
             logging.info("Getting the element form the yamnl file")
-            id_micro, location_record, location_place, location_point, \
-            audio_sample_rate, audio_window_size, audio_calibration_constant,\
-            storage_s3_bucket_name, storage_output_wav_folder, \
-            storage_output_acoust_folder = load_config_acoustic('config.yaml')
+            config = load_config()
             logging.info("Config loaded successfully")    
        
        

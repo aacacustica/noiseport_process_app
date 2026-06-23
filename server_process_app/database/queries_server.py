@@ -6,8 +6,6 @@ import time
 import sys
 import argparse
 
-from config import *
-
 from server_process_app.common.utils_queries import *
 from server_process_app.common.time_slop_fix import *
 from server_process_app.common.logging_config import *
@@ -18,11 +16,7 @@ from server_process_app.common.settings import settings
 PATH = settings.paths.measurements
 ISDIR = os.path.isdir(PATH)
 
-ID_MICRO, LOCATION_RECORD, LOCATION_PLACE, LOCATION_POINT, \
-AUDIO_SAMPLE_RATE, AUDIO_WINDOW_SIZE, AUDIO_CALIBRATION_CONSTANT,\
-STORAGE_S3_BUCKET_NAME, STORAGE_OUTPUT_WAV_FOLDER, \
-STORAGE_OUTPUT_ACOUSTIC_FOLDER,DEVICES_TXT,INBOX_FOLDER, \
-ACOUSTIC_QUERIES_FOLDER_NAME, PREDICTION_QUERIES_FOLDER_NAME = load_config_acoustic('config.yaml')
+config = load_config()
 
 logger = setup_logging('query_automatize')
 

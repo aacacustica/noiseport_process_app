@@ -6,23 +6,13 @@ import ssl
 import paho.mqtt.client as mqtt
 import pandas as pd
 
-from config import * 
-from utils import * 
-from utils_queries import * 
-
-
-
 from server_process_app.common.config import *
 from server_process_app.common.utils import *
 from server_process_app.common.utils_queries import *
 
-PATH = SANDISK_PATH_LINUX_NEW
+PATH = config["paths"]["measurements"]
 
-ID_MICRO, LOCATION_RECORD, LOCATION_PLACE, LOCATION_POINT, \
-AUDIO_SAMPLE_RATE, AUDIO_WINDOW_SIZE, AUDIO_CALIBRATION_CONSTANT,\
-STORAGE_S3_BUCKET_NAME, STORAGE_OUTPUT_WAV_FOLDER, \
-STORAGE_OUTPUT_ACOUSTIC_FOLDER,DEVICES_TXT, INBOX_FOLDER,  \
-ACOUSTIC_QUERIES_FOLDER_NAME, PREDICTION_QUERIES_FOLDER_NAME = load_config_acoustic('config.yaml')
+config = load_config()
 
 def load_devices(devices_folder,logger):
     """
@@ -603,8 +593,8 @@ def get_sonometer_rasp_acoustics_preds_days_and_paths(logger,point):
 def get_sonometer_rasp_acoustics_preds_days_and_paths_server_version(logger,device):
 
     
-    acoustics_params_folder_path = os.path.join(INBOX_FOLDER,device,ACOUSTICS_FOLDER_NAME)
-    predictions_litle_folder_path = os.path.join(INBOX_FOLDER,device,PREDICTIONS_FOLDER_NAME)
+    acoustics_params_folder_path = os.path.join(config['inbox_folder'],device,config['acoustic_folder'])
+    predictions_litle_folder_path = os.path.join(config['inbox_folder'],device,config['predictions_folder'])
 
 
     days_folders_acoustics = [os.path.join(acoustics_params_folder_path, day) for day in os.listdir(acoustics_params_folder_path) if 'fixed_' in day ]

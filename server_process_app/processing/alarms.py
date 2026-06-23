@@ -149,25 +149,6 @@ def collect_folders_days_devices(folders, devices):
     return dict_days
 
 
-
-
-
-def load_devices(devices_folder,logger):
-    """
-    devices_folder: str, path to the txt file that contains the names of the devices to process, one per line.
-
-
-    returns: list of str, full paths to the devices folders to process.
-    """
-    devices = []
-
-    with open(devices_folder, 'r') as f:
-        for line in f:
-            device = line.strip()
-            devices.append(os.path.join(INBOX_FOLDER, device))
-
-    return devices
-
 def main():
     """
     execution
@@ -181,7 +162,7 @@ def main():
         urban_taxonomy_map, port_taxonomy_map = taxonomy_json()
         taxonomy = "port" if args.port else "urban"
 
-        devices = load_devices(DEVICES_TXT,logger)
+        devices = load_devices()
         oca_limits = resolve_oca_type(args.limit_oca)
 
         #input_folder = args.path_general

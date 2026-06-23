@@ -126,7 +126,7 @@ def main():
         urban_taxonomy_map, port_taxonomy_map = taxonomy_json()
         taxonomy = "port" if args.port else "urban"
 
-        devices = load_devices(DEVICES_TXT,logger)
+        devices = load_devices()
         oca_limits = resolve_oca_type(args.limit_oca)
 
         #input_folder = args.path_general

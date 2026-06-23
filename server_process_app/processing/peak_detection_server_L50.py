@@ -25,11 +25,6 @@ logging.basicConfig(level=logging.INFO,
                     filename='peak_detection.log', 
                     filemode='w')
 
-ID_MICRO, LOCATION_RECORD, LOCATION_PLACE, LOCATION_POINT, \
-AUDIO_SAMPLE_RATE, AUDIO_WINDOW_SIZE, AUDIO_CALIBRATION_CONSTANT,\
-STORAGE_S3_BUCKET_NAME, STORAGE_OUTPUT_WAV_FOLDER, \
-STORAGE_OUTPUT_ACOUSTIC_FOLDER,DEVICES_TXT,INBOX_FOLDER, \
-ACOUSTIC_QUERIES_FOLDER_NAME, PREDICTION_QUERIES_FOLDER_NAME = load_config_acoustic('config.yaml')
 
 
 def _extract_key_from_filename(path: str):
@@ -356,7 +351,7 @@ def main():
 
     """
     if not args.path:
-        base_path = SANDISK_PATH_LINUX
+        base_path = config["paths"]["measurements"]
     else:
         base_path = args.path
     """
