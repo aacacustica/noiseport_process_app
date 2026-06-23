@@ -1,6 +1,5 @@
 import os
 import boto3
-import pandas as pd
 
 from tqdm import tqdm
 import datetime

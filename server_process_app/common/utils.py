@@ -1,4 +1,3 @@
-
 import numpy as np
 import os
 from pyfilterbank.octbank import FractionalOctaveFilterbank
@@ -10,8 +9,8 @@ import logging
 import yaml
 import csv
 import boto3
-import sys
-sys.path.insert(0, "/home/aac/I+D/CODIGOS/NoisePort_server/")
+
+
 
 # Constantes de inicializacion
 T = 1

@@ -1,9 +1,11 @@
 import numpy as np
 import pandas as pd
-from datetime import datetime, time
+
 import subprocess
 import os
-from config_vi import *
+
+
+from server_process_app.common.config_vi import *
 
 def collect_df_server(reg_folder):
 

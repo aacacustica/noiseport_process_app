@@ -1,21 +1,19 @@
 import sys
-sys.path.insert(0, "/home/aac/I+D/CODIGOS/NoisePort_server/")
+
 import pandas as pd
 import matplotlib.pyplot as plt
 import os
 plt.style.use("bmh")
-from tqdm import tqdm
-import glob
-import json
+
 from scipy.signal import find_peaks
-import ast
+
 import re
 
 
-from visualization import *
-from reading import *
-from utils_vi import *
-from config_vi import *
+from server_process_app.common.reading_alarms import *
+from server_process_app.common.utils_vi import *
+from server_process_app.common.config_vi import *
+from server_process_app.common.visualization_alarms import *
 
 
 

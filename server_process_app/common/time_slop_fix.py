@@ -8,6 +8,12 @@ import pandas as pd
 from config import *
 from logging_config import *
 
+
+
+
+from server_process_app.common.logging_config import *
+from server_process_app.common.config import *
+
 logger = setup_logging("query_automatize")
 
 CODE_ROOT = Path("/home/aac/I+D/CODIGOS/NoisePort_server")

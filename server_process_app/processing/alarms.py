@@ -1,6 +1,5 @@
-
 import sys
-sys.path.insert(0, "/home/aac/I+D/CODIGOS/NoisePort_server/")
+
 import argparse
 import os
 import re

@@ -7,15 +7,15 @@ import wave
 import contextlib
 import datetime 
 import datetime
-import sys
 
 
-sys.path.insert(0, "/home/aac_s3_test/noisePort_server/04_queries")
-from queries_server import *
 from ast import literal_eval
 from pathlib import Path
-from config import *
-from utils_queries import *
+
+
+from server_process_app.database.queries_server import *
+from server_process_app.common.config import *
+from server_process_app.common.utils_queries import *
 
 import warnings
 warnings.filterwarnings("ignore")

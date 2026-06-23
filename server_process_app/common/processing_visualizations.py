@@ -5,19 +5,18 @@ import sys
 
 plt.style.use("bmh")
 
-from visualization import *
-from reading import *
-from utils_vi import *
-sys.path.insert(0, "/home/aac/I+D/CODIGOS/NoisePort_server/06_visualization")
-from config_vi import *
-from config_vi import RELATIVE_PATH_SHIPS_15MIN,RELATIVE_PATH_SHIPS_1S,RELATIVE_PATH_SHIPS_1H
+
 from tqdm import tqdm
 from pathlib import Path
-import glob
 import json
 from scipy.signal import find_peaks
-import ast
 
+
+from server_process_app.common.config_vi import *
+from server_process_app.processing.visualizations import *
+from server_process_app.common.utils_vi import *
+from server_process_app.common.reading_visualizations import *
+from server_process_app.common.visualization_visualization import *
 
 
 def load_data(file_path, logger, new_date=None, new_time=None, new_threshold_date=None, new_threshold_time=None, selected_folder=None):

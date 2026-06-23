@@ -9,6 +9,13 @@ import pandas as pd
 from config import * 
 from utils import * 
 from utils_queries import * 
+
+
+
+from server_process_app.common.config import *
+from server_process_app.common.utils import *
+from server_process_app.common.utils_queries import *
+
 PATH = SANDISK_PATH_LINUX_NEW
 
 ID_MICRO, LOCATION_RECORD, LOCATION_PLACE, LOCATION_POINT, \

@@ -13,7 +13,7 @@ from server_process_app.common.utils_queries import *
 from server_process_app.common.time_slop_fix import *
 from server_process_app.common.logging_config import *
 from server_process_app.common.utils import *
-from server_process_app.common.processing import *
+from server_process_app.common.processing_queries import *
 
 PATH = SANDISK_PATH_LINUX_NEW
 ISDIR = os.path.isdir(PATH)
