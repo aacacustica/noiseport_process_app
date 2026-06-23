@@ -1,11 +1,12 @@
 import logging
 import os
 
+from server_process_app.common.settings import settings
 
 def setup_logging(script_name, level=logging.INFO):
     current_dir = os.path.dirname(os.path.abspath(__file__))
     log_dir = "log"
-    full_path_log_dir = os.path.join(current_dir, log_dir)
+    full_path_log_dir = settings.paths.logs
     os.makedirs(full_path_log_dir, exist_ok=True)
 
     #log file 

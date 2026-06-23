@@ -6,7 +6,6 @@ import time
 import sys
 import argparse
 
-from Proyectos.noiseport_process_app.server_process_app.common.processing_queries import *
 from config import *
 
 from server_process_app.common.utils_queries import *
@@ -14,8 +13,9 @@ from server_process_app.common.time_slop_fix import *
 from server_process_app.common.logging_config import *
 from server_process_app.common.utils import *
 from server_process_app.common.processing_queries import *
+from server_process_app.common.settings import settings
 
-PATH = SANDISK_PATH_LINUX_NEW
+PATH = settings.paths.measurements
 ISDIR = os.path.isdir(PATH)
 
 ID_MICRO, LOCATION_RECORD, LOCATION_PLACE, LOCATION_POINT, \
@@ -75,12 +75,13 @@ def main():
     process_sonometer   = args.sonometer
     
     db = mysql.connector.connect(
-            host=HOST_NEW,
-            user=USER_NEW,
-            password=PASSWORD_NEW,
-            allow_local_infile=True,
-            allow_local_infile_in_path="/srv/services/inbox",
-            )
+        host=settings.mysql.host,
+        user=settings.mysql.user,
+        password=settings.mysql.password,
+        database=settings.mysql.database,
+        allow_local_infile=True,
+        allow_local_infile_in_path=settings.paths.inbox,
+    )
     
     if DB_INIT_SWITCH: initialize_database(db, logger)
     

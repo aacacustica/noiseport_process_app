@@ -6,34 +6,9 @@ import datetime
 
 from server_process_app.common import logging_config
 from server_process_app.common import config
+from server_process_app.common.settings import settings
 
 HOME_DIR = os.getenv("HOME")
-
-
-
-def read_credentials():
-    credentials_path = os.path.join(os.getcwd(),'credentials_aws')
-    config_path = os.path.join(os.getcwd(),"config_aws")
-    
-    with open(credentials_path, 'r', encoding='UTF-8') as file:
-        while line := file.readline():
-
-            if 'aws_access_key_id' in line:
-                aws_access_key_id = line.replace('aws_access_key_id = ','')
-                aws_access_key_id = aws_access_key_id.replace("\n", "")
-            if 'aws_secret_access_key' in line:
-                aws_secret_access_key = line.replace('aws_secret_access_key = ','')
-                aws_secret_access_key = aws_secret_access_key.replace("\n", "")
-    return aws_access_key_id,aws_secret_access_key
-            
-
-def load_downloaded_file(downloaded_file_path):
-    """Load the set of downloaded filenames from a text file."""
-    if os.path.exists(downloaded_file_path):
-        with open(downloaded_file_path, "r") as f:
-            return {line.strip() for line in f if line.strip()}
-    return set()
-
 
 
 def update_downloaded_file(downloaded_file_path, filename):
@@ -72,10 +47,12 @@ def download_new_files(bucket_name, home_dir, logger, downloaded_list='downloade
     # INIZIALATIN S3
     # ---------------------------
     AWS_ACCESS_KEY,AWS_SECRET_ACCESS_KEY = read_credentials()
+
     s3 = boto3.client(
-        's3',
-        aws_secret_access_key = AWS_SECRET_ACCESS_KEY,
-        aws_access_key_id = AWS_ACCESS_KEY)
+        "s3",
+        aws_access_key_id=settings.aws.access_key_id,
+        aws_secret_access_key=settings.aws.secret_access_key,
+    )
 
     logger.info("\nListing files in bucket")
     response = s3.list_objects_v2(Bucket=bucket_name)
@@ -158,7 +135,7 @@ def main():
 
     logger = logging_config.setup_logging('retrive_data')
     
-    download_new_files(BUCKET_NAME, HOME_DIR,logger)
+    download_new_files(settings.aws.bucket_name, settings.paths.inbox, logger)
     
 
 if __name__ == "__main__":

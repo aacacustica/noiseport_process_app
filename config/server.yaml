@@ -3,6 +3,11 @@ paths:
   measurements: /srv/contenedores/CONTENEDORES/CONTENEDORES/3-Medidas
   results: /srv/contenedores/CONTENEDORES/CONTENEDORES/5-Resultados
   logs: /var/log/noiseport-server
+  devices_txt: /srv/services/inbox/devices.txt
+
+models:
+  yamnet_h5: server_process_app/common/yamnet.h5
+  yamnet_class_map: server_process_app/common/yamnet_class_map.csv
 
 conda:
   env_name: s3_env

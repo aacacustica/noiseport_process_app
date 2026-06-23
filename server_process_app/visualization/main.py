@@ -7,14 +7,10 @@ from server_process_app.common.logging_config import *
 from server_process_app.common.config_vi import *
 from server_process_app.common.utils import *
 from server_process_app.common.processing_visualizations import *
+from server_process_app.common.settings import settings
 
-COEFFS_PATH = "/home/aac/I+D/CODIGOS/NoisePort_server/point_coeffs.json"
+COEFFS_PATH = settings.paths.coeffs_json
 
-ID_MICRO, LOCATION_RECORD, LOCATION_PLACE, LOCATION_POINT, \
-AUDIO_SAMPLE_RATE, AUDIO_WINDOW_SIZE, AUDIO_CALIBRATION_CONSTANT,\
-STORAGE_S3_BUCKET_NAME, STORAGE_OUTPUT_WAV_FOLDER, \
-STORAGE_OUTPUT_ACOUSTIC_FOLDER,DEVICES_FOLDER,INBOX_FOLDER, \
-ACOUSTIC_QUERIES_FOLDER_NAME, PREDICTION_QUERIES_FOLDER_NAME = load_config_acoustic('config.yaml')
 
 def arg_parser():
     parser = argparse.ArgumentParser(description='Plotting AudioMoth data')
@@ -178,23 +174,6 @@ def resolve_oca_type(oca_type):
     if oca_type not in oca_map:
         raise ValueError(f"Invalid OCA type: {oca_type}")
     return oca_map[oca_type]
-
-def load_devices(devices_folder,logger):
-    """
-    devices_folder: str, path to the txt file that contains the names of the devices to process, one per line.
-
-
-    returns: list of str, full paths to the devices folders to process.
-    """
-    devices = []
-
-    with open(devices_folder, 'r') as f:
-        for line in f:
-            device = line.strip()
-            devices.append(os.path.join(INBOX_FOLDER, device))
-
-    return devices
-
 
 
 def main():

@@ -1,4 +1,5 @@
 devices:
   - id: P6_TEST_AUTOMATIZE
     microphone_id: RPI_6
+    calibration_constant: 0
     enabled: true

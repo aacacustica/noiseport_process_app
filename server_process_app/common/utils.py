@@ -10,7 +10,10 @@ import yaml
 import csv
 import boto3
 
+from server_process_app.common.settings import settings
 
+def load_devices():
+    return [os.path.join(settings.paths.inbox, d["id"]) for d in settings.enabled_devices]
 
 # Constantes de inicializacion
 T = 1

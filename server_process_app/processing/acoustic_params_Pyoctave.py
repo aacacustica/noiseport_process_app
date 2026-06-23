@@ -18,7 +18,7 @@ from scipy.signal import lfilter
 from server_process_app.common.logging_config import *
 from server_process_app.common.pyoctaveband import *
 from server_process_app.common.utils import *
-from server_process_app.common.config import *
+from server_process_app.common.settings import settings
 
 
 
@@ -434,13 +434,15 @@ def point_iteration_acoustics(point, root, storage_output_wav_folder,audio_sampl
     # POINT PARAMS
     # ------------------------------
     if point in CALIBRATION_CONSTANTS:
-        calib = CALIBRATION_CONSTANTS[point]
+        device_cfg = settings.device_by_id(point)
+        calib = device_cfg["calibration_constant"]
         logging.info(f"Calibration constant: {calib}")
     else:
         raise ValueError(f"Calibration constant for {point} not found in CALIBRATION_CONSTANTS.")
 
     if point in ID_MICROPHONE:
-        id_micro = ID_MICROPHONE[point]
+        device_cfg = settings.device_by_id(point)
+        id_micro = device_cfg["microphone_id"]
         logging.info(f"ID Microphone: {id_micro}")
     else:
         raise ValueError(f"ID Microphone for {point} not found in ID_MICROPHONE.")
@@ -550,7 +552,7 @@ def main():
             else:
 
                 if os.name == 'posix':
-                    path = SANDISK_PATH_LINUX_NEW
+                    path = settings.paths.measurements
                     logging.info(f"Using path: {path}")
                 elif os.name == 'nt':
                     path = SANDISK_PATH_WINDOWS

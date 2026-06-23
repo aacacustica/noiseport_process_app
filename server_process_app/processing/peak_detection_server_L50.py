@@ -12,13 +12,13 @@ import re
 
 from scipy.signal import find_peaks
 from tqdm import tqdm
-from config import *
+
 
 
 from server_process_app.common.logging_config import *
 from server_process_app.common.config_peak import *
 from server_process_app.common.utils import *
-
+from server_process_app.common.settings import settings
 
 logging.basicConfig(level=logging.INFO, 
                     format='%(asctime)s - %(levelname)s - %(message)s', 
@@ -345,29 +345,13 @@ def argument_parser():
     return parser.parse_args()
 
 
-def load_devices(devices_folder,logger):
-    """
-    devices_folder: str, path to the txt file that contains the names of the devices to process, one per line.
-
-
-    returns: list of str, full paths to the devices folders to process.
-    """
-    devices = []
-
-    with open(devices_folder, 'r') as f:
-        for line in f:
-            device = line.strip()
-            devices.append(os.path.join(INBOX_FOLDER, device))
-
-    return devices
-
 def main():
     # python -m 05_peak.peak_detection_L50
     
     logger = setup_logging('peak_detection')
 
     #point_to_process = args.point
-    devices = load_devices(DEVICES_TXT,logger)
+    devices = load_devices()
     print("Processing devices :", devices)
 
     """

@@ -12,9 +12,6 @@ import soundfile as sf
 import tensorflow as tf
 import pandas as pd
 
-from . import params as yamnet_params
-from . import yamnet as yamnet_model
-
 import warnings
 
 from collections import defaultdict
@@ -23,6 +20,7 @@ from server_process_app.common.logging_config import *
 from server_process_app.common.utils import *
 from server_process_app.common import inference_params as yamnet_params
 from server_process_app.common import yamnet as yamnet_model
+from server_process_app.common.settings import settings
 
 warnings.filterwarnings("ignore", 
                         message="FNV hashing is not implemented in Numba",
@@ -30,25 +28,19 @@ warnings.filterwarnings("ignore",
 
 print(f"Current GPU: {tf.config.list_physical_devices('GPU')}")
 
-(
-    ID_MICRO,
-    S3_BUCKET_NAME,
-    PLACE,
-    POINT,
-    OUTPUT_PARENT_FOLDER,
-    OUTPUT_WAV_FOLDER,
-    OUTPUT_ACOUST_FOLDER,
-    OUTPUT_PREDICT_FOLDER,
-    _,
-    YAMNET_CLASS_MAP_CSV,
-    SAMPLE_RATE,
-    CHUNK_SIZE,
-    MODEL_TF,
-    _,
-    
 
-) = load_config_inference('config.yaml', os.getcwd())
-"id_micro, location_record, location_place, location_point, storage_s3_bucket_name, storage_output_wav_folder, storage_output_acoust_folder, storage_output_predict_folder, storage_output_predict_lt_folder, prediction_yamnet_class_map_csv, prediction_sample_rate, prediction_chunk_size, prediction_model_tf, prediction_model_tflt"
+ID_MICRO = settings.device_by_id
+S3_BUCKET_NAME = settings.s3_bucket_name
+PLACE = settings.place
+POINT = settings.point
+OUTPUT_PARENT_FOLDER = settings.parent_folder
+OUTPUT_WAV_FOLDER = settings.wav_folder
+OUTPUT_ACOUST_FOLDER = settings.output_acoust_folder
+OUTPUT_PREDICT_FOLDER = settings.output_predict_folder
+YAMNET_CLASS_MAP_CSV = settings.class_map_csv
+SAMPLE_RATE = settings.sample_rate
+CHUNK_SIZE = settings_chunk_size
+MODE_TF = settings.model_tf
 
 def concatenate_prediction_csvs_to_daily(prediction_folder,logging):
 
@@ -288,7 +280,7 @@ def inference(path,model_path, sample_rate, chunk_size, window_size, threshold, 
 def load_args_config(model_path,point,window_size,threshold,upload_s3,home_dir,path):
 
         if path: path = path       
-        else: path = os.path.join('/srv/contenedores/CONTENEDORES/CONTENEDORES/3-Medidas', point, OUTPUT_WAV_FOLDER)
+        else: path = settings.paths.measurements / point / settings.processing.wav_folder_name
               
         if os.path.exists(path):
             logging.info(f"Path exists --> {path}")
@@ -296,7 +288,7 @@ def load_args_config(model_path,point,window_size,threshold,upload_s3,home_dir,p
             raise Exception('Path doesnt exist.')
 
         if model_path: model_path = model_path
-        else: model_path = MODEL_TF
+        else: model_path = settings.models.yamnet_h5
 
         if window_size: window_size = window_size
         else: window_size = None

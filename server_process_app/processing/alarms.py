@@ -15,15 +15,6 @@ from server_process_app.common.config_vi import *
 
 
 
-
-ID_MICRO, LOCATION_RECORD, LOCATION_PLACE, LOCATION_POINT, \
-AUDIO_SAMPLE_RATE, AUDIO_WINDOW_SIZE, AUDIO_CALIBRATION_CONSTANT,\
-STORAGE_S3_BUCKET_NAME, STORAGE_OUTPUT_WAV_FOLDER, \
-STORAGE_OUTPUT_ACOUSTIC_FOLDER,DEVICES_TXT,INBOX_FOLDER, \
-ACOUSTIC_QUERIES_FOLDER_NAME, PREDICTION_QUERIES_FOLDER_NAME = load_config_acoustic('config.yaml')
-
-
-
 """
 def arg_parser():
     
@@ -149,17 +140,13 @@ def resolve_oca_type(oca_type):
     return oca_map[oca_type]
 
 
-def collect_folders_days_devices(folders,devices):
-
-    dict_days = {}
+def collect_folders_days_devices(folders, devices):
+    dict_days = {device: [] for device in devices}
     for device in devices:
         for folder in folders:
-            device_folder = folder.split("/")[-2]
-            if device == device_folder:
-                dict_days[device] = dict_days[device] + folder
-
-
-    None
+            if os.path.basename(os.path.dirname(folder)) == os.path.basename(device):
+                dict_days[device].append(folder)
+    return dict_days
 
 
 
@@ -192,7 +179,7 @@ def main():
         logger.info(f"Starting alarm processing!!")
         yamnet_csv = yamnet_class_map_csv()
         urban_taxonomy_map, port_taxonomy_map = taxonomy_json()
-        taxonomy,taxonomy = args.urban,args.port
+        taxonomy = "port" if args.port else "urban"
 
         devices = load_devices(DEVICES_TXT,logger)
         oca_limits = resolve_oca_type(args.limit_oca)
