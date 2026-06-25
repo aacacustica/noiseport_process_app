@@ -13,10 +13,46 @@ from server_process_app.common.utils import *
 from server_process_app.common.processing_queries import *
 from server_process_app.common.settings import settings
 
-PATH = settings.paths.measurements
 ISDIR = os.path.isdir(PATH)
 
 config = load_config()
+
+
+# -----------------------------------
+# CONFIG GLOBAL VARIABLES
+# -----------------------------------
+PATH = config["paths"]["measurements"]
+
+
+
+
+DB_HOST = config["mysql"]["host"]
+DB_PORT = config["mysql"]["port"]
+DB_USER = config["mysql"]["user"]
+DB_PASSWORD = config["mysql"]["password"]
+DB_DATABASE = config["mysql"]["database"]
+DB_ALLOW_LOCAL_INFILE = config["mysql"]["local_infile"]
+DB_ALLOW_LOCAL_INFILE_IN_PATH = config["paths"]["inbox"]
+
+DB_INIT_SWITCH = config["server"]["queries"]["db_init"]
+ACOUSTIC_QUERY_SWITCH = config["server"]["queries"]["acoustic_query"]
+PREDICT_QUERY_SWITCH = config["server"]["queries"]["prediction_query"]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+devices = get_device_paths()
 
 logger = setup_logging('query_automatize')
 

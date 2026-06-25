@@ -1,5 +1,36 @@
 devices:
-  - id: P6_TEST_AUTOMATIZE
-    microphone_id: RPI_6
+  - id: raspberry1
+    microphone_id: RPI_1
     calibration_constant: 0
     enabled: true
+    source_type: RP
+
+  - id: raspberrypi2
+    microphone_id: RPI_2
+    calibration_constant: 0
+    enabled: true
+    source_type: RP
+
+  - id: raspberry3
+    microphone_id: RPI_3
+    calibration_constant: 0
+    enabled: true
+    source_type: RP
+
+  - id: raspberrypi4
+    microphone_id: RPI_4
+    calibration_constant: 0
+    enabled: true
+    source_type: RP
+
+  - id: ccmp13-dvk
+    microphone_id: ccmp-dvk
+    calibration_constant: 0
+    enabled: true
+    source_type: sensor
+
+  - id: ccmp13-dvk-2
+    microphone_id: ccmp-dvk
+    calibration_constant: 0
+    enabled: true
+    source_type: sensor

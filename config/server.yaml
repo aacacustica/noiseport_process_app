@@ -3,17 +3,65 @@ paths:
   measurements: /srv/contenedores/CONTENEDORES/CONTENEDORES/3-Medidas
   results: /srv/contenedores/CONTENEDORES/CONTENEDORES/5-Resultados
   logs: /var/log/noiseport-server
-  devices_txt: /srv/services/inbox/devices.txt
-  ships_1h: r"/home/aac/EMBARQUES/TCT/CONTENEDORES_TCT_embarques_1h.csv"
-  ships_15min: r"/home/aac/EMBARQUES/TCT/CONTENEDORES_TCT_embarques_15min.csv"
-  ships_1s: r"/home/aac/EMBARQUES/TCT/CONTENEDORES_TCT_embarques_1s.csv"
+  state: /srv/noiseport/state
+
+  ships_1h: /home/aac/EMBARQUES/TCT/CONTENEDORES_TCT_embarques_1h.csv
+  ships_15min: /home/aac/EMBARQUES/TCT/CONTENEDORES_TCT_embarques_15min.csv
+  ships_1s: /home/aac/EMBARQUES/TCT/CONTENEDORES_TCT_embarques_1s.csv
+
+  point_coeffs: server_process_app/common/resources/point_coeffs.json
+
+processing:
+  wav_folder: wav_files
+  acoustic_folder: acoustic_params
+  prediction_folder: prediction_files
+  sonometer_folder: sonometer_files
+
+  acoustic_queries_folder: acoustic_params_query
+  prediction_queries_folder: prediction_files_query
+  peaks_folder: peaks_query
+  merged_folder: merged
+
+  fixed_prefix: fixed_
+  expected_wavs_per_hour: 60
+
+acoustic:
+  sample_rate: 16000
+  window_size: 16000
+
+inference:
+  sample_rate: 16000
+  chunk_size: 15600
+  window_size: 1.0
+  threshold: 0.3
 
 models:
-  yamnet_h5: server_process_app/common/yamnet.h5
-  yamnet_class_map: server_process_app/common/yamnet_class_map.csv
+  yamnet_h5: server_process_app/common/models/yamnet.h5
+  yamnet_class_map: server_process_app/common/resources/yamnet_class_map.csv
 
-conda:
-  env_name: s3_env
+queries:
+  db_init: false
+  acoustic_query: true
+  prediction_query: true
+  wav_query: false
+  sonometer_query: false
+  send_mqtt: false
+  time_slop_fix: false
+  sonometer_window: 3600
+  acoustic_table_name:
+  
+
+peaks:
+  window_size: 30
+  adding_threshold: 5
+  prominence: 3
+  width: 2
+
+visualization:
+  agg_period: 900
+  percentiles: [90, 10]
+  limit_oca: OCA_RESIDENTIAL
+  taxonomy: port
 
 pipeline:
   enabled_steps:
@@ -21,3 +69,6 @@ pipeline:
     - peaks
     - alarms
     - visualizations
+
+conda:
+  env_name: s3_env

@@ -2,18 +2,12 @@ import numpy as np
 import os
 from pyfilterbank.octbank import FractionalOctaveFilterbank
 from scipy.fft import fft
-from pyfilterbank.octbank import frequencies_fractional_octaves
-from scipy.signal import lfilter
 import subprocess
 import logging
-import yaml
 import csv
-import boto3
 
 from server_process_app.common.settings import settings
-
-def load_devices():
-    return [os.path.join(settings.paths.inbox, d["id"]) for d in settings.enabled_devices]
+from server_process_app.common.settings import config
 
 # Constantes de inicializacion
 T = 1
@@ -195,53 +189,42 @@ def get_audiofiles(path):
     return audio_files
 
 
+# -----------------------------------
+# CONFIG & DEVICES
+# -----------------------------------
 
-# -----------------------------------
-# REGULAR FUNCTIONS
-# -----------------------------------
+def load_devices():
+    return [os.path.join(settings.paths.inbox, d["id"]) for d in settings.enabled_devices]
+
 def load_config():
 
     return settings
 
+def get_enabled_devices() -> list[dict]:
+    return [d for d in config["devices"] if d.get("enabled", True)]
 
+def get_device_ids() -> list[str]:
+    return [d["id"] for d in get_enabled_devices()]
+
+def get_device_paths() -> list[str]:
+    inbox = config["paths"]["inbox"]
+    return [os.path.join(inbox, d["id"]) for d in get_enabled_devices()]
+
+def get_device_config(device_id: str) -> dict:
+    for d in config["devices"]:
+        if d["id"] == device_id:
+            return d
+    raise KeyError(f"Device not configured: {device_id}")
+
+# -----------------------------------
+# REGULAR FUNCTIONS
+# -----------------------------------
 
 def class_names_csv(class_map_csv):
     with open(class_map_csv) as csv_file:
         reader = csv.reader(csv_file)
         next(reader)   # Skip header
         return np.array([display_name for (_, _, display_name) in reader])
-
-
-
-
-
-def upload_file_to_s3(file_path, bucket_name, logging):
-    """
-    Upload the local file_path to the given S3 bucket.
-    """
-    s3 = boto3.client('s3')
-    # creating the paths 
-    s3_path = file_path.split("/")[3:]
-    # joint it back
-    s3_path = "/".join(s3_path)
-    # s3_full_path = os.path.join(s3_path)
-    
-    
-    # change the s3 path
-    # change just the first CONTENEDORES ocurrence to NOISEPORT-TENERIFE/, but not the sencond one
-    s3_path = s3_path.replace("CONTENEDORES", "NOISEPORT-TENERIFE", 1)
-
-
-    logging.info(f"Uploading {file_path} to s3://{bucket_name}/{s3_path}")
-    try:
-        s3.upload_file(file_path, bucket_name, s3_path)
-        logging.info("Upload successful!")
-    
-    except Exception as e:
-        logging.error(f"Failed to upload to S3: {e}")
-
-
-
 
 #----------------------------
 #  GIT
