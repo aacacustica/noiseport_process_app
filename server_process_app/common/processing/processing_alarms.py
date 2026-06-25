@@ -10,10 +10,10 @@ from scipy.signal import find_peaks
 import re
 
 
-from server_process_app.common.reading_alarms import *
-from server_process_app.common.utils_vi import *
-from server_process_app.common.config_vi import *
-from server_process_app.common.visualization_alarms import *
+from noiseport_process_app.server_process_app.common.reading.reading_alarms import *
+from noiseport_process_app.server_process_app.common.utils.utils_vi import *
+from noiseport_process_app.server_process_app.common.config.config_vi import *
+from noiseport_process_app.server_process_app.common.graphics.visualization_alarms import *
 
 
 

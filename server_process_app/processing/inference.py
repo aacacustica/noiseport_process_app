@@ -16,11 +16,11 @@ import warnings
 
 from collections import defaultdict
 
-from server_process_app.common.logging_config import *
-from server_process_app.common.utils import *
-from server_process_app.common import inference_params as yamnet_params
+from Proyectos.noiseport_process_app.server_process_app.common.misc.logging_config import *
+from Proyectos.noiseport_process_app.server_process_app.common.utils.utils import *
+from Proyectos.noiseport_process_app.server_process_app.common.misc import inference_params as yamnet_params
 from server_process_app.common import yamnet as yamnet_model
-from server_process_app.common.settings import settings
+from Proyectos.noiseport_process_app.server_process_app.common.config.settings import settings
 
 warnings.filterwarnings("ignore", 
                         message="FNV hashing is not implemented in Numba",

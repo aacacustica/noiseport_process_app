@@ -3,11 +3,11 @@ import argparse
 import os
 import sys
 
-from server_process_app.common.logging_config import *
-from server_process_app.common.config_vi import *
-from server_process_app.common.utils import *
-from server_process_app.common.processing_visualizations import *
-from server_process_app.common.settings import settings
+from server_process_app.common.misc.logging_config import *
+from server_process_app.common.config.config_vi import *
+from server_process_app.common.utils.utils import *
+from server_process_app.common.processing.processing_visualizations import *
+from server_process_app.common.config.settings import settings
 
 COEFFS_PATH = settings.paths.coeffs_json
 

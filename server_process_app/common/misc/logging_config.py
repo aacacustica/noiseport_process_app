@@ -1,7 +1,7 @@
 import logging
 import os
 
-from server_process_app.common.settings import settings
+from server_process_app.common.config.settings import settings
 
 def setup_logging(script_name, level=logging.INFO):
     current_dir = os.path.dirname(os.path.abspath(__file__))

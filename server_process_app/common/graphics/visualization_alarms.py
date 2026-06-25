@@ -19,8 +19,8 @@ import sys
 #)
 
 
-from server_process_app.common.utils_vi import *
-from server_process_app.common.config_vi import *
+from server_process_app.common.utils.utils_vi import *
+from server_process_app.common.config.config_vi import *
 
 plt.rc('font', size=MEDIUM_SIZE)          # controls default text sizes
 plt.rc('axes', titlesize=MEDIUM_SIZE)     # fontsize of the axes title

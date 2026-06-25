@@ -15,10 +15,10 @@ from tqdm import tqdm
 
 
 
-from server_process_app.common.logging_config import *
-from server_process_app.common.config_peak import *
-from server_process_app.common.utils import *
-from server_process_app.common.settings import settings
+from server_process_app.common.misc.logging_config import *
+from server_process_app.common.config.config_peak import *
+from server_process_app.common.utils.utils import *
+from server_process_app.common.config.settings import settings
 
 logging.basicConfig(level=logging.INFO, 
                     format='%(asctime)s - %(levelname)s - %(message)s', 

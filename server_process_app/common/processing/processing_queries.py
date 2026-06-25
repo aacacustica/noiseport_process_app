@@ -14,8 +14,8 @@ from pathlib import Path
 
 
 from server_process_app.database.queries_server import *
-from server_process_app.common.config import *
-from server_process_app.common.utils_queries import *
+from server_process_app.common.config.config import *
+from server_process_app.common.utils.utils_queries import *
 
 import warnings
 warnings.filterwarnings("ignore")

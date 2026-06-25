@@ -5,7 +5,7 @@ import subprocess
 import os
 
 
-from server_process_app.common.config_vi import *
+from server_process_app.common.config.config_vi import *
 
 def collect_df_server(reg_folder):
 

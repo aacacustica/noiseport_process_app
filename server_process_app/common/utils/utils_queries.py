@@ -6,9 +6,9 @@ import ssl
 import paho.mqtt.client as mqtt
 import pandas as pd
 
-from server_process_app.common.config import *
-from server_process_app.common.utils import *
-from server_process_app.common.utils_queries import *
+from server_process_app.common.config.config import *
+from server_process_app.common.utils.utils import *
+from server_process_app.common.utils.utils_queries import *
 
 PATH = config["paths"]["measurements"]
 

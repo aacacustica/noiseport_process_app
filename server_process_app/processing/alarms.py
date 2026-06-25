@@ -7,11 +7,11 @@ import re
  
 
 
-from server_process_app.common.utils import *
-from server_process_app.common.utils_vi import *
-from server_process_app.common.processing_alarms import *
-from server_process_app.common.logging_config import *
-from server_process_app.common.config_vi import *
+from server_process_app.common.utils.utils import *
+from server_process_app.common.utils.utils_vi import *
+from server_process_app.common.processing.processing_alarms import *
+from server_process_app.common.misc.logging_config import *
+from server_process_app.common.config.config_vi import *
 
 
 

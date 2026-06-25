@@ -6,9 +6,9 @@ from pathlib import Path
 import pandas as pd
 
 
-from server_process_app.common.logging_config import *
-from server_process_app.common.config import *
-from server_process_app.common.settings import settings
+from server_process_app.common.misc.logging_config import *
+from server_process_app.common.config.config import *
+from server_process_app.common.config.settings import settings
 
 logger = setup_logging("query_automatize")
 

@@ -6,8 +6,8 @@ import subprocess
 import logging
 import csv
 
-from server_process_app.common.settings import settings
-from server_process_app.common.settings import config
+from server_process_app.common.config.settings import settings
+from server_process_app.common.config.settings import config
 
 # Constantes de inicializacion
 T = 1
