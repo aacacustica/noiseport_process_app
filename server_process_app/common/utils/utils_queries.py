@@ -30,14 +30,12 @@ def load_devices(devices_folder,logger):
 
     return devices
         
-def load_folders(devices):
+def load_folders(devices_full_paths,folder_name):
 
-    devices_full_path = [os.path.join(f,INBOX_FOLDER) for f in devices]
 
-    acoust_folders = [os.path.join(f,ACOUSTICS_FOLDER_NAME) for f in devices_full_path]
-    prediction_folders = [os.path.join(f,PREDICTIONS_FOLDER_NAME) for f in devices_full_path]
+    folders = [os.path.join(f,folder_name) for f in devices_full_paths]
 
-    return acoust_folders,prediction_folders
+    return folders
 
 
 

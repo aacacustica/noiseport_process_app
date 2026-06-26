@@ -16,11 +16,11 @@ import warnings
 
 from collections import defaultdict
 
-from Proyectos.noiseport_process_app.server_process_app.common.misc.logging_config import *
-from Proyectos.noiseport_process_app.server_process_app.common.utils.utils import *
-from Proyectos.noiseport_process_app.server_process_app.common.misc import inference_params as yamnet_params
+from server_process_app.common.misc.logging_config import *
+from server_process_app.common.utils.utils import *
+from server_process_app.common.misc import inference_params as yamnet_params
 from server_process_app.common import yamnet as yamnet_model
-from Proyectos.noiseport_process_app.server_process_app.common.config.settings import settings
+from server_process_app.common.config.settings import settings
 
 warnings.filterwarnings("ignore", 
                         message="FNV hashing is not implemented in Numba",
@@ -29,18 +29,7 @@ warnings.filterwarnings("ignore",
 print(f"Current GPU: {tf.config.list_physical_devices('GPU')}")
 
 
-ID_MICRO = settings.device_by_id
-S3_BUCKET_NAME = settings.s3_bucket_name
-PLACE = settings.place
-POINT = settings.point
-OUTPUT_PARENT_FOLDER = settings.parent_folder
-OUTPUT_WAV_FOLDER = settings.wav_folder
-OUTPUT_ACOUST_FOLDER = settings.output_acoust_folder
-OUTPUT_PREDICT_FOLDER = settings.output_predict_folder
-YAMNET_CLASS_MAP_CSV = settings.class_map_csv
-SAMPLE_RATE = settings.sample_rate
-CHUNK_SIZE = settings_chunk_size
-MODE_TF = settings.model_tf
+
 
 def concatenate_prediction_csvs_to_daily(prediction_folder,logging):
 
@@ -301,28 +290,6 @@ def load_args_config(model_path,point,window_size,threshold,upload_s3,home_dir,p
         
         return model_path,window_size,threshold,upload_s3,path
 
-def parse_arguments():
-    parser = argparse.ArgumentParser(description='Make prediction with YAMNet model for audio files')
-    parser.add_argument('-f', '--path', type=str, required=False,
-                        help='Folder containing WAV files to process')
-    parser.add_argument('-p', '--point', type=str, required=True,
-                        help='Point to process')
-
-    parser.add_argument('-w', '--window-size', type=float, default=None,
-                        help='Window size in seconds for processing audio files. '
-                             'Default is None for processing the entire audio.')
-
-    parser.add_argument('-t', '--threshold', type=float, default=None,
-                        help='Classification threshold for predictions.')
-
-    parser.add_argument('-m', '--model-path', type=str, default=None,
-                        help='Insert the model path to make predictions.')
-
-    parser.add_argument('-u', '--upload-S3', action='store_true',default=False,
-                        help='If provided, upload the final CSV to S3.')
-
-    return parser.parse_args()
-
 def load_predictions_done(workingdir):
 
     txt_path = workingdir
@@ -336,7 +303,6 @@ def load_predictions_done(workingdir):
                     filename = filename.replace('_tf_w_1.0.csv','.wav').replace('_tf.csv','.wav')
                 preds.append(filename)
     return preds
-
 
 
 def update_predictions_file(workingdir,file):
@@ -377,9 +343,6 @@ def main():
     
     except Exception as e:
         logging.error(f"Errorgetting the config info: {e}")
-
-
-
 
 
     try:

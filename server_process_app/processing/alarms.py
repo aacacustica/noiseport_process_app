@@ -14,56 +14,6 @@ from server_process_app.common.misc.logging_config import *
 from server_process_app.common.config.config_vi import *
 
 
-
-"""
-def arg_parser():
-    
-    parser = argparse.ArgumentParser(description='Plotting AudioMoth data')
-    parser.add_argument('-f', '--path_general', type=str, required=True, 
-                        help='Path to sonometers folder')
-    
-    parser.add_argument('-a', '--agg_period', type=int, required=False, default=900, 
-                        help='Aggregation period in seconds')
-    parser.add_argument('-p', '--percentiles', type=float, nargs='+', required=False, default=[90, 10],
-                        help='Percentiles to plot [1 5 10 50 90] (L90 and L10 as default)')
-    parser.add_argument('-l', '--limit_oca', type=str, required=False, default='OCA_RESIDENTIAL',
-                        help='Limit OCA to plot [OCA_RESIDENTIAL, OCA_LEISURE, OCA_OFFICE, OCA_INDUSTRIAL, OCA_CULTURE]')
-    
-    parser.add_argument('--audiomoth', action='store_true', 
-                        help='Process audiomoth data')
-    parser.add_argument('--sonometer', action='store_true', 
-                        help='Process sonometer data'),
-    parser.add_argument('--raspbery', action='store_true',
-                        help='Process Raspberry Pi like TCT Tenerife'),
-    
-    #urban or port taxonomy
-    parser.add_argument('--urban', action='store_true', 
-                        help='Urban taxonomy')
-    parser.add_argument('--port', action='store_true', 
-                        help='Port taxonomy')
-    parser.add_argument('--point', type=str, required=False, 
-    help='Only process this point (e.g. P5_TEST). If omitted, process all points.')
-    return parser.parse_args()
-"""
-
-def arg_parser():
-
-    parser = argparse.ArgumentParser(description='Plotting devices data')
-
-    parser.add_argument('-a', '--agg_period', type=int, required=False, default=900, 
-                        help='Aggregation period in seconds')
-    parser.add_argument('-p', '--percentiles', type=float, nargs='+', required=False, default=[90, 10],
-                        help='Percentiles to plot [1 5 10 50 90] (L90 and L10 as default)')
-    parser.add_argument('-l', '--limit_oca', type=str, required=False, default='OCA_RESIDENTIAL',
-                        help='Limit OCA to plot [OCA_RESIDENTIAL, OCA_LEISURE, OCA_OFFICE, OCA_INDUSTRIAL, OCA_CULTURE]')
-    parser.add_argument('--urban', action='store_true', 
-                        help='Urban taxonomy')
-    parser.add_argument('--port', action='store_true', 
-                        help='Port taxonomy')
-    return parser.parse_args()
-    
-
-
 def collect_folders(input_folder,label_source_type, logger,point_filter=None):
     folders = []
 

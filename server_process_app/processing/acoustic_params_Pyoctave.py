@@ -15,16 +15,13 @@ from scipy.signal import lfilter
 
 
 
-from server_process_app.common.logging_config import *
-from server_process_app.common.pyoctaveband import *
-from server_process_app.common.utils import *
-from server_process_app.common.settings import settings
+from server_process_app.common.misc.logging_config import *
+from server_process_app.common.processing.pyoctaveband import *
+from server_process_app.common.utils.utils import *
+from server_process_app.common.config.settings import settings
 
 
 config = load_config()
-
-CALIBRATION_CONSTANTS = config['']
-ID_MICROPHONE = config['']
 
 def twenty_db_fix(levels):
     levels_fix = []
@@ -482,20 +479,6 @@ def point_iteration_acoustics(point, root, storage_output_wav_folder,audio_sampl
     # END
     # ------------------------------
     return leq_processor,wav_files_folder
-
-def parse_arguments():
-    parser = argparse.ArgumentParser(description='Make prediction with YAMNet model for audio files')
-    parser.add_argument('-f', '--path', type=str, required=False,
-                        help='Folder containing WAV files to process')
-    parser.add_argument('-p','--point', type=str, required=True,
-                        help='Point to process')
-    parser.add_argument('-c', '--calib-const', type=str, required=False, default=0,
-                        help='Calibration constant to setup for each audio device.')
-    parser.add_argument('-u', '--upload-S3', action='store_true',default=False,
-                        help='If provided, upload the final CSV to S3.')
-    return parser.parse_args()
-
-
 
 def main():
     """

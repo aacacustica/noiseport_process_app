@@ -1,13 +1,11 @@
 paths:
   inbox: /srv/services/inbox
-  measurements: /srv/contenedores/CONTENEDORES/CONTENEDORES/3-Medidas
-  results: /srv/contenedores/CONTENEDORES/CONTENEDORES/5-Resultados
   logs: /var/log/noiseport-server
   state: /srv/noiseport/state
 
-  ships_1h: /home/aac/EMBARQUES/TCT/CONTENEDORES_TCT_embarques_1h.csv
-  ships_15min: /home/aac/EMBARQUES/TCT/CONTENEDORES_TCT_embarques_15min.csv
-  ships_1s: /home/aac/EMBARQUES/TCT/CONTENEDORES_TCT_embarques_1s.csv
+  ships_1h: server_process_app/common/resources/CONTENEDORES_TCT_embarques_1h.csv
+  ships_15min: server_process_app/common/resources/CONTENEDORES_TCT_embarques_15min.csv
+  ships_1s: server_process_app/common/resources//CONTENEDORES_TCT_embarques_1s.csv
 
   point_coeffs: server_process_app/common/resources/point_coeffs.json
 
@@ -24,6 +22,7 @@ processing:
 
   fixed_prefix: fixed_
   expected_wavs_per_hour: 60
+  mode: urban                                                                                            # GENERAL urban || port
 
 acoustic:
   sample_rate: 16000
@@ -34,9 +33,11 @@ inference:
   chunk_size: 15600
   window_size: 1.0
   threshold: 0.3
+  mode: urban                                                                                           # INFERENCE urban || port
 
 models:
-  yamnet_h5: server_process_app/common/models/yamnet.h5
+
+  yamnet_h5: server_process_app/common/resources/models/yamnet.h5
   yamnet_class_map: server_process_app/common/resources/yamnet_class_map.csv
 
 queries:
@@ -48,7 +49,10 @@ queries:
   send_mqtt: false
   time_slop_fix: false
   sonometer_window: 3600
-  acoustic_table_name:
+  acoustic_table_name: acoustic_params
+  predictions_table_name: predict_data
+  sonometer_table_name: sonometer_acoustic_data
+  wav_table_name: wav_data
   
 
 peaks:
@@ -62,6 +66,9 @@ visualization:
   percentiles: [90, 10]
   limit_oca: OCA_RESIDENTIAL
   taxonomy: port
+  filter_point: 
+  mode:                                                                                                 # VISUALIZATION urban | port
+  change_date: false                                                                                     # true | false (default)                               
 
 pipeline:
   enabled_steps:

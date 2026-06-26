@@ -6,14 +6,12 @@ import time
 import sys
 import argparse
 
-from server_process_app.common.utils_queries import *
-from server_process_app.common.time_slop_fix import *
-from server_process_app.common.logging_config import *
-from server_process_app.common.utils import *
-from server_process_app.common.processing_queries import *
-from server_process_app.common.settings import settings
-
-ISDIR = os.path.isdir(PATH)
+from server_process_app.common.utils.utils_queries import *
+from server_process_app.common.misc.time_slop_fix import *
+from server_process_app.common.misc.logging_config import *
+from server_process_app.common.utils.utils import *
+from server_process_app.common.processing.processing_queries import *
+from server_process_app.common.config.settings import settings
 
 config = load_config()
 
@@ -21,40 +19,8 @@ config = load_config()
 # -----------------------------------
 # CONFIG GLOBAL VARIABLES
 # -----------------------------------
-PATH = config["paths"]["measurements"]
 
-
-
-
-DB_HOST = config["mysql"]["host"]
-DB_PORT = config["mysql"]["port"]
-DB_USER = config["mysql"]["user"]
-DB_PASSWORD = config["mysql"]["password"]
-DB_DATABASE = config["mysql"]["database"]
-DB_ALLOW_LOCAL_INFILE = config["mysql"]["local_infile"]
-DB_ALLOW_LOCAL_INFILE_IN_PATH = config["paths"]["inbox"]
-
-DB_INIT_SWITCH = config["server"]["queries"]["db_init"]
-ACOUSTIC_QUERY_SWITCH = config["server"]["queries"]["acoustic_query"]
-PREDICT_QUERY_SWITCH = config["server"]["queries"]["prediction_query"]
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-devices = get_device_paths()
-
-logger = setup_logging('query_automatize')
+logger = setup_logging('[Queries]')
 
 def arg_parser():
 
@@ -93,85 +59,104 @@ def prediction_processing(folder_days,db,logger, all_info, query_pred_folder, pr
 
 def main():
     
-    # ------------------------------------
-    # INITIALIZATION
-    # ------------------------------------
+    # +----------------------------------------------------------------------+ #
+    #   INITIALIZATION: CONFIG , DATABASE , DEVICES LIST & FULL FOLDER PATHS   #
+    # +----------------------------------------------------------------------+ #
+
+
+
+    # ------------------------- config ---------------------------------------- #
+
+    db_host                         = config['mysql']['MYSQL_HOST']
+    db_user                         = config['mysql']['MYSQL_USER']
+    db_password                     = config['mysql']['MYSQL_PASSWORD']
+    db_name                         = config['mysql']['MYSQL_DATABASE']
+    db_local_infile                 = config['mysql']['MYSQL_LOCAL_INFILE']
+    db_local_infile_path            = config['paths']['inbox']
+    db_init_value                   = config['mysql']['active_switch']
+
+    devices                         = config['devices']
+
+    acoustic_query_switch           = config['queries']['acoustic_query']
+    prediction_query_switch         = config['queries']['prediction_query']
+    sonometer_query_switch          = config['queries']['sonometer_query']
+    wav_query_switch                = config['queries']['wav_query']
+    acoustic_table_name             = config['queries']['acoustic_table_name']
+    prediction_table_name           = config['queries']['predictions_table_name']
+    sonometer_table_name            = config['queries']['sonometer_table_name']
+    wav_table_name                  = config['queries']['wav_data']
+    time_slop_apply                 = config['queries']['time_slop']
+    send_mqtt                       = config['queries']['send_mqtt']
+
+    inbox_folder                    = config['paths']['inbox']
+
+    acoustics_folder_name           = config['processing']['acoustic_folder']
+    predictions_folder_name         = config['processing']['prediction_folder']
     
-    args = arg_parser()
-    
-    sonometer_window    = args.window
-    time_slop           = args.time_slop
-    send_mqtt           = args.send_mqtt
-    process_sonometer   = args.sonometer
+    # ------------------------- devices ---------------------------------------- #
+
+    devices_ids = [device['id'] for device in devices if device['enabled'] == True]
+    devices_folder_paths = [os.path.join(inbox_folder,device['id']) for device in devices if device['enabled'] == True]
+
+    # ------------------------- database ---------------------------------------- #
     
     db = mysql.connector.connect(
-        host=settings.mysql.host,
-        user=settings.mysql.user,
-        password=settings.mysql.password,
-        database=settings.mysql.database,
-        allow_local_infile=True,
-        allow_local_infile_in_path=settings.paths.inbox,
+        host                            = db_host,
+        user                            = db_user,
+        password                        = db_password,
+        database                        = db_name,
+        allow_local_infile              = db_local_infile,
+        allow_local_infile_in_path      = db_local_infile_path,
     )
     
-    if DB_INIT_SWITCH: initialize_database(db, logger)
-    
-    logger.info("[Queries] Initializing database!")
-    
-    logger.info("[Queries] Starting!!")
-     
-    if ISDIR:
-        logger.info(f"PATH exists --> {PATH}")
-    else:
-        raise ValueError(f'PATH ({PATH}) doesnt exist.')
+    if db_init_value: initialize_database(db, logger)
     
     
+    # ------------------------- folders ---------------------------------------- #
+
+    acoustic_folders                    = load_folders(devices_folder_paths,acoustics_folder_name)
+    prediction_folders                  = load_folders(devices_folder_paths,predictions_folder_name)
+
     
 
-    all_info = []
-
-    # ---------------------------
-    # 1. LOAD DEVICE NAMES AND FULL FOLDER PATHS
-    # ---------------------------
-
-    devices                                     = load_devices(DEVICES_TXT,logger)
-    acoustic_folders,prediction_folders         = load_folders(devices)
 
     logger.info(f"[Queries] Devices to query: {devices}")
     logger.info(f"[Queries] Info located in {acoustic_folders} , {prediction_folders}")
 
-    for device in tqdm.tqdm(devices, desc="Processing devices", unit="device"):
-        
-        try:
-            print("Processing: ", device)
-            device_folder_path = device
-            
-            if os.path.isdir(device):
-                device = os.path.basename(device)
-            else:
-                raise ValueError(f"Device path is not a folder: {device}")
-            logger.info(f"Processing queries for : {device}")
-            # ---------------------------
-            # 2. LIST ACOUSTIC AND PREDICTION FOLDERS FOR A SPECIFIC DEVICE
-            # ---------------------------
+    all_info = []
 
-            acoustic_folder_device = [f for f in acoustic_folders if device in f.split('\\')]
-            prediction_folder_device = [f for f in prediction_folders if device in f.split('\\')]
-            
-            # ---------------------------
-            # 3. CREATE QUERIES FOLDERS FOR EACH SPECIFIC DEVICE
-            # ---------------------------
+    for device in tqdm.tqdm(devices_ids, desc="Processing devices", unit="device"):
         
+        # +------------------------------------------------------------+ #
+        #   LOOP for each device:                                        #
+        #        1. List folders,create queries folders,intialize .txts  #
+        #        2. List files                                           #
+        #        3. Apply time slop fix to filtered files                #
+        #        4. Re-list files with the fixed version                 #
+        #        5. Make queries!                                        #
+        #        6. Save all_info to JSON                                #
+        #        7. Add processed folder to all_info                     #
+        #        8. Close DB                                             #
+        # +------------------------------------------------------------+ #
+        try:
+            logger.info(f"Processing queries for : {device}")
+
+            # ------------------------- list folders ------------------------ #
+
+            device_folder_path              = os.path.join(inbox_folder,device)
+            acoustic_folder_device          = [f for f in acoustic_folders if device in f.split('/')]
+            prediction_folder_device        = [f for f in prediction_folders if device in f.split('/')]
+            
+            # ------------------------- create queries folders --------------- #
             (
+                
                 query_acoustic_folder,
                 query_pred_folder,
 
             ) = create_query_folders_server(device_folder_path,logger)
 
-            # ---------------------------
-            # INITIALIZING PROCESSING FILES
-            # ---------------------------
-            
-            (
+            # ------------------------- initialize .txts --------------------- #
+            (   
                 processed_folder_acoustic_txt_path,
                 processed_folder_predictions_txt_path,
                 processed_mqtt_data_txt_path,
@@ -179,24 +164,12 @@ def main():
                 processed_predictions_list,
                 processed_mqtt_list
 
-                )  = initialize_process_files_server(query_acoustic_folder,query_pred_folder,logger)
+            )  = initialize_process_files_server(query_acoustic_folder,query_pred_folder,logger)
 
             logger.info(f"Saving the processed list of predictions files txt here   -->             {processed_folder_predictions_txt_path}" )
             logger.info(f"Saving the processed list of acoustics files txt here     -->             {processed_folder_acoustic_txt_path}"    )
 
-        except Exception as e:
-            logger.error(f"Error setting up folders: {e}")
-            continue
-
-
-
-        try:
-
-            # ------------------------------------
-            #   Filter the FILES, JUST THE FOLDERS
-            # ------------------------------------
-
-
+            # ------------------------- list files ----------------------------- #
             (
                 acoustics_params_folder_path,
                 predictions_litle_folder_path,
@@ -204,23 +177,11 @@ def main():
                 days_folders_predictions,
 
             ) =  get_sonometer_rasp_acoustics_preds_days_and_paths_server_version(logger,device) 
-            #No queremos aún el resto de rutas porque recoge los archivos fixed y aun no se han generado
-        except Exception as e:
-            logger.error(f"Error listing folder days: {e}")
-            continue
 
-
-
-        try:
-
-            # --------------------------------------------------
-            #   FIX OF THE EXTRA SECONDS IN MINUTE PROBLEM     
-            # --------------------------------------------------
-            
-            if time_slop: 
-                time_slop_fix(device,acoustics_params_folder_path,predictions_litle_folder_path,logger)
-            #Recall to this function as now it gives us the updated folder with the time slop fix for day records
-
+            # ------------------------- Apply time slops ------------------------- #
+            if time_slop_apply:  time_slop_fix(device,acoustics_params_folder_path,predictions_litle_folder_path,logger)
+                
+            # ------------------------- Re-list files ----------------------------- #
             (
                 acoustics_params_folder_path,
                 predictions_litle_folder_path,
@@ -228,88 +189,33 @@ def main():
                 days_folders_predictions,
                 
             ) =  get_sonometer_rasp_acoustics_preds_days_and_paths_server_version(logger,device) 
-            
-        except Exception as e:
-
-            logger.error(f"Error while applying the time slop fix to csv records: {e}")
-            continue
-
-            # -.--------------------
-            # PROCESSING
-            # ----------------------
-        
-        try:
-
-            whole_start_time = time.time()
                 
-            if ACOUSTIC_QUERY_SWITCH:
-
-                logger.info("[Acoustics] Quering")
-                try:
-                    logger.info(f"[Acoustics] days_folder_acoustics : {days_folders_acoustics}")
-                    end_time = acoustic_processing(
-                                                    folder_days=                        days_folders_acoustics,
-                                                    db=                                 db,
-                                                    logger=                             logger,
-                                                    all_info=                           all_info,
-                                                    query_acoustic_folder=              query_acoustic_folder,
-                                                    processed_acoustics=                processed_acoustics_list,
-                                                    processed_folder_acoustic_txt=      processed_folder_acoustic_txt_path,
-                                                    device=                             device)
+            # ------------------------- Make queries ----------------------------- #
+                
+            if acoustic_query_switch:
                     
-                    
+                    acoustic_processing(days_folders_acoustics,db,logger,all_info,query_acoustic_folder,processed_acoustics_list,processed_folder_acoustic_txt_path,device)    
                     if send_mqtt:
-                        power_avg_results = power_laeq_avg(db,logger,device,table_name=ACOUSTIC_TABLE_NAME) 
-                        send_mqtt_data(power_avg_results,logger,processed_mqtt_data_txt_path)
-                    logger.info(f"[Acoustics] Finished quering")
-                    print("[Acoustics] --- %s seconds in execution ---" %end_time)
-                except Exception as e:
-                    logger.exception(f"Error quering acoustics")                      
-            print("Quering device: ",device)
-            print("Days folders predictions:",  days_folders_predictions)
-            print("Days folders acoustics: ",   days_folders_acoustics)
-            print("Query pred folder: ",query_pred_folder)
-            print("Query acoust folder: ",query_acoustic_folder)
-            if PREDICT_QUERY_SWITCH:
-                
-                logger.info("[Preditions] Quering")
-                try:
-                    end_time = prediction_processing(
-                                                    folder_days =                       days_folders_predictions,
-                                                    db =                                db,
-                                                    logger =                            logger,
-                                                    all_info =                          all_info,
-                                                    query_pred_folder=                  query_pred_folder,
-                                                    processed_predictions=              processed_predictions_list,
-                                                    processed_folder_predictions_txt=   processed_folder_predictions_txt_path,
-                                                    device=                             device)
+                        power_avg_results = power_laeq_avg(db,logger,device,acoustic_table_name)
+                        send_mqtt_data(power_avg_results,logger,processed_mqtt_data_txt_path)              
                     
-                    logger.info(f"[Predictions] Finished quering")
-                    print("[Predictions] --- %s seconds in execution ---" %end_time)  
-                except:
-                    logger.exception(f"Error quering predictions")
+            if prediction_query_switch: prediction_processing(days_folders_predictions,db,logger,all_info,query_pred_folder,processed_predictions_list,processed_folder_acoustic_txt_path,device)
+            if sonometer_query_switch: None
+            if wav_query_switch: None
+
+            # ------------------------- Save all_info to JSON -----------------------#
+
+
+
+
+
             
-            print(  "\n"
-                    "\n"
-                    " --- %s seconds in total execution ---" "\n"
-                        % round(time.time() - whole_start_time,2))
-    
         except Exception as e:
-            logger.exception(f"Error while processing folders")
+            logger.info(f"Error processing:{device} , {e}")
+
         
-        
+    # ------------------------- Add processed folder to all_info ----------- #
 
-
-    # ------------------------------------
-    #   Save all_info to json
-    # ------------------------------------
-    
-
-
-
-    # ------------------------------------
-    #   Adding the folder processed to the all_info
-    # ------------------------------------
     for device in devices:
 
         logger.info("")
@@ -317,7 +223,7 @@ def main():
         logger.info("all_info: %s", all_info)
         json.dump(all_info, sys.stdout, indent=4, default=decimal_to_native)
 
-        query_acoustic_folder = os.path.join(device,ACOUSTICS_FOLDER_NAME) 
+        query_acoustic_folder = os.path.join(device,acoustics_folder_name) 
         all_info_path = os.path.join(query_acoustic_folder, f"{device}_all.json")
         
         with open(all_info_path, "w") as f:
@@ -326,16 +232,13 @@ def main():
         logger.info("Saved all_info to: %s", all_info_path)
         
 
-    # ------------------------------------
-    #   Closing DB
-    # ------------------------------------
+    # ------------------------- Close DB ------------------------------------- #
     
-    try:
-        logger.info("")
-        db.close()
-        logger.info("Database connection closed")
-    except mysql.connector.Error as err:
-        logger.error("Error closing database connection: %s", err)
+
+    logger.info("")
+    db.close()
+    logger.info("Database connection closed")
+
 
 
 if __name__ == "__main__":
