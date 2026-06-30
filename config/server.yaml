@@ -54,12 +54,18 @@ queries:
   sonometer_table_name: sonometer_acoustic_data
   wav_table_name: wav_data
   
-
 peaks:
   window_size: 30
   adding_threshold: 5
   prominence: 3
   width: 2
+
+alarms:
+  mode: urban
+  oca_limit: OCA_RESIDENTIAL
+  agg_period: 900
+  percentiles: [90, 10]
+  probability_threshold: 0.3
 
 visualization:
   agg_period: 900

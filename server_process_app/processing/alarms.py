@@ -14,6 +14,9 @@ from server_process_app.common.misc.logging_config import *
 from server_process_app.common.config.config_vi import *
 
 
+config = load_config()
+logger = setup_logging("Alarms")
+
 def collect_folders(input_folder,label_source_type, logger,point_filter=None):
     folders = []
 
@@ -90,70 +93,44 @@ def resolve_oca_type(oca_type):
     return oca_map[oca_type]
 
 
-def collect_folders_days_devices(folders, devices):
-    dict_days = {device: [] for device in devices}
-    for device in devices:
-        for folder in folders:
-            if os.path.basename(os.path.dirname(folder)) == os.path.basename(device):
-                dict_days[device].append(folder)
-    return dict_days
-
-
 def main():
-    """
-    execution
-        python3 -m 06_alarms_processing.main -f "\192.168.205.120\Contenedores\5-Resultados\" --raspbery --port (--point P5_TEST)
-    """
+
+    # +----------------------------------------------------------------------+ #
+    #   INITIALIZATION: CONFIG , DEVICES LIST & FULL FOLDER PATHS              #
+    # +----------------------------------------------------------------------+ #
+
+    mode                = config['alarms']['mode']
+    limit_oca           = config['alarms']['oca_limit']
+    agg_period          = config['alarms']['agg_period']
+    percentiles         = config['alarms']['percentiles']
+    devices             = config['devices']
+
+
+    devices_ids             = [device['id'] for device in devices if device['enabled'] == True]
+    devices_folder_paths    = [os.path.join(inbox_folder,device['id']) for device in devices if device['enabled'] == True]
+    enabled_devices         = [device['id'] for device in devices if device['enabled'] == True]
+    taxonomy = mode
+
     try:
-        logger = setup_logging("Alarms")
-        args = arg_parser()
-        logger.info(f"Starting alarm processing!!")
-        yamnet_csv = yamnet_class_map_csv()
-        urban_taxonomy_map, port_taxonomy_map = taxonomy_json()
-        taxonomy = "port" if args.port else "urban"
-
-        devices = load_devices()
-        oca_limits = resolve_oca_type(args.limit_oca)
-
-        #input_folder = args.path_general
         
-        """
-        source_types = {
-            "AUDIOMOTH": args.audiomoth,
-            "SONOMETRO": args.sonometer,
-            "RASPBERRY": args.raspbery,
-        }
-        """
+        yamnet_csv                              = yamnet_class_map_csv()
+        urban_taxonomy_map, port_taxonomy_map   = taxonomy_json()
+        devices                                 = load_devices()
+        oca_limits                              = resolve_oca_type(limit_oca)
+        folders                                 = collect_folders_server(devices)
+        days_devices                            = collect_folders_days_devices(folders,enabled_devices)
 
-
-
-
-
-        ############################
-        #folders = collect_folders(input_folder, label_source_type,logger,point_filter=args.point)
-        folders = collect_folders_server(devices)
-        days_devices = collect_folders_days_devices(folders,devices)
-        logger.info(f"Taxonomy: {taxonomy}")
-        #logger.info(f"Input folder: {input_folder}")
-
-
-        logger.info("Entering the process all folder function")
         
         process_all_folders(
-            folders,
-            args.agg_period,
-            args.percentiles,
-            taxonomy,
-            yamnet_csv,
-            "",
-            oca_limits,
-            args.limit_oca,
-            logger)
-
-        logger.info("Finished all processing.")
-
+            folders             = folders,
+            days_devices        = sorted(days_devices),
+            yamnet_csv          = yamnet_csv,
+            oca_limits          = oca_limits,
+            logger              = logger
+        )
+            
     except Exception as e:
-        logger.error(f"Error during executing the main program: {e}")
+        logger.error(f"Error during alarms: {e}")
 
 
 if __name__ == "__main__":

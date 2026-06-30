@@ -1,8 +1,0 @@
-WINDOW_SIZE = 30
-ADDING_THRESHOLD = 5
-PROMINENCE = 3
-WIDTH = 2
-
-ACOUSTICS_QUERY = "acoustic_params_query"
-PEAKS_QUERY = "peaks_query"
-MERGED_QUERY = "merged"

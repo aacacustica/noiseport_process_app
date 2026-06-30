@@ -1,14 +1,18 @@
-import numpy as np
-import os
+
 from pyfilterbank.octbank import FractionalOctaveFilterbank
 from scipy.fft import fft
-import subprocess
-import logging
-import csv
+from pathlib import Path
 
 from server_process_app.common.config.settings import settings
 from server_process_app.common.config.settings import config
 
+import numpy as np
+import os
+import subprocess
+import logging
+import csv
+
+inbox_folder = config['paths']['inbox']
 # Constantes de inicializacion
 T = 1
 # C = -54.70
@@ -150,19 +154,16 @@ def get_calibration_constant(x, db_value, T):
     C = db_value - level    
     return C
 
-# [8]
+
+
 def leq(levels):
-    """
-    Args:
-        levels (numpy.ndarray or list): An array or list of individual sound level measurements, typically expressed in decibels (dB).
+    levels = np.asarray(levels, dtype=float)
+    levels = levels[~np.isnan(levels)]
 
-    Returns:
-        float: The equivalent continuous sound level (Leq) of the input sound level measurements.
-    """
-    e_sum = (np.sum(np.power(10, np.multiply(0.1, levels)))) / len(levels)
-    eq_level = 10 * np.log10(e_sum)
-    return eq_level
+    if levels.size == 0:
+        return np.nan
 
+    return 10 * np.log10(np.mean(10 ** (levels / 10)))
 # [9]
 def get_oct_levels(y, octave, C):
     """
@@ -216,6 +217,34 @@ def get_device_config(device_id: str) -> dict:
             return d
     raise KeyError(f"Device not configured: {device_id}")
 
+def get_hourly_folders_device(devices,predictions_query_folder_name,peaks_query_folder_name,acoustics_query_folder_name):
+
+    hour_path_acoustics = []
+    hour_path_predictions = []
+    hour_path_peaks = []
+    
+    for device in devices:
+                    
+        predictions_params_query = os.path.join(device,predictions_query_folder_name)
+        peaks_params_query = os.path.join(device,peaks_query_folder_name)
+        acoustic_params_query = os.path.join(device,acoustics_query_folder_name)
+
+        if not os.path.exists(peaks_params_query): os.makedirs(peaks_params_query)
+
+        for file in os.listdir(acoustic_params_query):
+            if file.endswith('.csv') and 'fixed' in file:
+                hour_path_acoustics.append(os.path.join(acoustic_params_query,file))        
+        for file in os.listdir(predictions_params_query):
+            if file.endswith('.csv'):
+                hour_path_predictions.append(os.path.join(predictions_params_query,file))
+        for file in os.listdir(peaks_params_query):
+            if file.endswith('.csv') and 'fixed' in file:
+                hour_path_peaks.append(os.path.join(peaks_params_query,file))
+    
+    return hour_path_acoustics,hour_path_predictions,hour_path_peaks
+
+
+
 # -----------------------------------
 # REGULAR FUNCTIONS
 # -----------------------------------
@@ -264,3 +293,44 @@ def get_desired_query_folder(days_folder,desired_folder):
             days_folder[i] = days_folder[i].replace(days_folder[i].split('/')[-2],desired_folder)
 
     return days_folder
+
+def collect_folders_days_devices(folders,devices):
+
+    result = {
+        Path(device).name: {
+            "files": [],
+            "processed": False,
+        }
+        for device in devices
+    }
+
+    for folder in map(Path,folders):
+        device_name = folder.parent.name
+        if device_name not in result:
+            continue
+            
+        result[device_name].extend(
+            str(file)
+            for file in folder.iterdir()
+            if file.is_file() and file.suffix.lower() == '.csv'
+        )
+
+
+    return result
+
+
+def load_devices(devices_folder,logger):
+    """
+    devices_folder: str, path to the txt file that contains the names of the devices to process, one per line.
+
+
+    returns: list of str, full paths to the devices folders to process.
+    """
+    devices = []
+
+    with open(devices_folder, 'r') as f:
+        for line in f:
+            device = line.strip()
+            devices.append(os.path.join(inbox_folder, device))
+
+    return devices

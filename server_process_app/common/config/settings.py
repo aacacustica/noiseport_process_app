@@ -27,6 +27,7 @@ def load_settings() -> dict:
         "models": server.get("models", {}),
         "visualization": server.get("visualization", {}),
         "peaks": server.get("peaks", {}),
+        "alarms": server.get("alarms",{}),
         "queries": server.get("queries", {}),
 
         "mqtt": {
