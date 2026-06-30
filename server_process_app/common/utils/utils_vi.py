@@ -711,9 +711,6 @@ def transformation(df, logger, oca_limits):
 
     return df
 
-
-
-
 def list_git_tags():
     try:
         tags = tags = subprocess.check_output(["git", "tag"]).strip().decode()
@@ -741,3 +738,108 @@ def get_stable_version(logger):
     tag_selected = tag_selected.replace(".", "_")
     logger.info(f"Latest stable version string: {tag_selected}")
     return tag_selected
+
+def ask_date_time_changes():
+    def ask(prompt, pattern):
+        ans = input(prompt).lower()
+        while ans not in ['y', 'n']:
+            ans = input(prompt).lower()
+        if ans == 'y':
+            val = input("Enter value: ")
+            while not re.match(pattern, val):
+                val = input("Enter value: ")
+            return val
+        return None
+
+    return (
+        ask("Change date? (y/n): ", r"\d{4}-\d{2}-\d{2}"),
+        ask("Change time? (y/n): ", r"([01]?[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]"),
+        ask("Set threshold date? (y/n): ", r"\d{4}-\d{2}-\d{2}"),
+        ask("Set threshold time? (y/n): ", r"([01]?[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]")
+    )
+    
+
+def collect_folders(input_folder, change_time_flag,label_source_type, logger,point_filter):
+    folders, coefficients, date_time, threshold = [], {}, {}, {}
+    
+    #Lectura de los coeficientes desde un JSON para no tener que escribirlos por consola
+    with open(COEFFS_PATH,'r') as f:
+        coeffs = json.load(f)
+
+    if "raspberry" in label_source_type:
+        logger.info("Searching for RASPBERRY")
+        for root, dirs, _ in os.walk(input_folder):
+            if point_filter is not None:
+                if point_filter not in root:
+                    continue
+            if 'acoustics' in dirs:
+                path = os.path.join(root,ACOUSTIC_PARAMS_FOLDER)
+                if point_filter is not None:
+                    coefficients[path] = coeffs[point_filter]
+                else:
+                    coefficients[path] = coeffs[root.split("/")[-1]]
+                folder_name = path.split("/")[-3]
+                #coeff = float(input(f"Correction coefficient for {folder_name}: "))
+                new_date = new_time = t_date = t_time = None
+
+                if change_time_flag:
+                    new_date, new_time, t_date, t_time = ask_date_time_changes()
+
+                folders.append(path)
+                #coefficients[path] = coeff
+                date_time[path] = (new_date, new_time)
+                threshold[path] = (t_date, t_time)
+
+
+    if label_source_type == "audiomoth":
+        logger.info("Searching for RASPBERRY")
+        for root, dirs, _ in os.walk(input_folder):
+            if point_filter is not None:
+                if point_filter not in root:
+                    continue
+
+            if "AUDIOMOTH" in dirs:
+                path = os.path.join(root, "AUDIOMOTH")
+                if point_filter is not None:
+                    coefficients[path] = coeffs[point_filter]
+                else:
+                    coefficients[path] = coeffs[root.split("/")[-1]]
+                folder_name = path.split("\\")[-2]
+                #coeff = float(input(f"Correction coefficient for {folder_name}: "))
+                new_date = new_time = t_date = t_time = None
+
+                if change_time_flag:
+                    new_date, new_time, t_date, t_time = ask_date_time_changes()
+
+                folders.append(path)
+                #coefficients[path] = coeff
+                date_time[path] = (new_date, new_time)
+                threshold[path] = (t_date, t_time)
+
+
+    if label_source_type == "sonometer":
+        logger.info("Searching for RASPBERRY")
+        for root, dirs, _ in os.walk(input_folder):
+            if point_filter is not None:
+                if point_filter not in root:
+                    continue 
+            if "SONOMETER" in dirs:
+                path = os.path.join(root, "SONOMETER")
+                if point_filter is not None:
+                    coefficients[path] = coeffs[point_filter]
+                else:
+                    coefficients[path] = coeffs[root.split("/")[-1]]
+                folder_name = path.split("\\")[-2]
+                #coeff = float(input(f"Correction coefficient for {folder_name}: "))
+                new_date = new_time = t_date = t_time = None
+
+                if change_time_flag:
+                    new_date, new_time, t_date, t_time = ask_date_time_changes()
+
+                folders.append(path)
+                #coefficients[path] = coeff
+                date_time[path] = (new_date, new_time)
+                threshold[path] = (t_date, t_time)
+
+    return folders, coefficients, date_time, threshold
+

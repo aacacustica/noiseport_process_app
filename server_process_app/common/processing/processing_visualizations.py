@@ -123,14 +123,14 @@ def process_folder(folder_path, folder_date_time, folder_threshold, logger, sele
 
 
 
-def process_all_folders(input_folder, folders, PERIODO_AGREGACION, PERCENTILES, taxonomy, yamnet_csv, sufix_string, device_coeff, folder_date_time, folder_threshold, oca_limits, oca_type,device, logger):
-    print()
+def process_all_folders(input_folder, device_folders, PERIODO_AGREGACION, PERCENTILES, taxonomy, yamnet_csv, sufix_string, device_coeff, folder_date_time, folder_threshold, oca_limits, oca_type,device, logger):
+
     stable_version = get_stable_version(logger)
     home_dir = os.path.expanduser('~')
     temporal_bool = True
 
 
-    for folder in tqdm(folders, desc="Processing folders"): # \\192.168.205.117\AAC_Server\OCIO\24052_ZARAUTZ\CAMPAÑA_1\3-Medidas\ZARAUTZ_C1_P1\AUDIOMOTH
+    for folder in tqdm(device_folders, desc="Processing folders"): # \\192.168.205.117\AAC_Server\OCIO\24052_ZARAUTZ\CAMPAÑA_1\3-Medidas\ZARAUTZ_C1_P1\AUDIOMOTH
         logger.info("")
         logger.info(f"Suffix string: {sufix_string}")
 
