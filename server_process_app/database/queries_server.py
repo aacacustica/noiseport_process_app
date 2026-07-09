@@ -83,7 +83,7 @@ def main():
     acoustic_table_name             = config['queries']['acoustic_table_name']
     prediction_table_name           = config['queries']['predictions_table_name']
     sonometer_table_name            = config['queries']['sonometer_table_name']
-    wav_table_name                  = config['queries']['wav_data']
+    wav_table_name                  = config['queries']['wav_table_name']
     time_slop_apply                 = config['queries']['time_slop']
     send_mqtt                       = config['queries']['send_mqtt']
 
