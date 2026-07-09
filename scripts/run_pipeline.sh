@@ -19,7 +19,7 @@ flock -n 200 || {
 }
 
 LOG_DIR="$(python - <<'PY'
-from server_process_app.common.utils import load_config
+from server_process_app.common.utils.utils import load_config
 print(load_config()["paths"]["logs"])
 PY
 )"
@@ -29,8 +29,8 @@ mkdir -p "$LOG_DIR"
 echo "=== PIPELINE START: $(date) ===" | tee -a "$LOG_DIR/pipeline.log"
 
 python -m server_process_app.database.queries_server
-python -m server_process_app.processing.peak_detection_server_L50
+python -m server_process_app.processing.peaksL50
 python -m server_process_app.processing.alarms
-python -m server_process_app.processing.visualizations
+python -m server_process_app.processing.visualization
 
 echo "=== PIPELINE END: $(date) ===" | tee -a "$LOG_DIR/pipeline.log"

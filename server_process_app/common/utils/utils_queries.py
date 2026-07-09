@@ -12,8 +12,25 @@ from server_process_app.common.utils.utils_queries import *
 
 
 config = load_config()
-PATH = config["paths"]["measurements"]
-        
+
+MQTT_PORT_MUUTECH               = config['mqtt']['port']
+MQTT_USER_MUUTECH               = config['mqtt']['user']
+MQTT_PASSWORD_MUUTECH           = config['mqtt']['password']
+MQTT_BROKER_MUUTECH             = config['mqtt']['host']
+
+DATABASE_NAME                   = config['mysql']['database']
+QUERYS                          = config['mysql']['querys']
+TABLES                          = config['mysql']['tables']
+
+ACOUSTIC_TABLE_NAME             = config['queries']['acoustic_table_name']
+WAV_TABLE_NAME                  = config['queries']['wav_table_name']
+PREDICT_TABLE_NAME              = config['queries']['predictions_table_name']
+SONOMETER_TABLE_NAME            = config['queries']['sonometer_table_name']
+
+ACOUSTIC_QUERIES_FOLDER_NAME    = config['processing']['acoustic_queries_folder']
+PREDICTION_QUERIES_FOLDER_NAME  = config['processing']['prediction_queries_folder']
+STORAGE_OUTPUT_ACOUSTIC_FOLDER  = config['processing']['acoustic_folder']
+
 def load_folders(devices_full_paths,folder_name):
 
 
@@ -93,25 +110,17 @@ def send_mqtt_data(data, logger, sent_Records_txt):
 
     # Conexión al broker
     try:
-        if DEMO:
-            port = int(MQTT_PORT_DEMO)
-            client.connect(MQTT_BROKER_DEMO, port, keepalive=60)
-            logger.info(
-                "Connected to MQTT broker DEMO at %s:%s",
-                MQTT_BROKER_DEMO,
-                port,
-            )
-        else:
-            port = int(MQTT_PORT_MUUTECH)
-            client.username_pw_set(MQTT_USER_MUUTECH, MQTT_PASSWORD_MUUTECH)
-            client.tls_set(cert_reqs=ssl.CERT_NONE)
-            client.tls_insecure_set(True)
-            client.connect(MQTT_BROKER_MUUTECH, port, keepalive=60)
-            logger.info(
-                "Connected to MQTT broker MUUTECH at %s:%s",
-                MQTT_BROKER_MUUTECH,
-                port,
-            )
+
+        port = int(MQTT_PORT_MUUTECH)
+        client.username_pw_set(MQTT_USER_MUUTECH, MQTT_PASSWORD_MUUTECH)
+        client.tls_set(cert_reqs=ssl.CERT_NONE)
+        client.tls_insecure_set(True)
+        client.connect(MQTT_BROKER_MUUTECH, port, keepalive=60)
+        logger.info(
+            "Connected to MQTT broker MUUTECH at %s:%s",
+            MQTT_BROKER_MUUTECH,
+            port,
+        )
     except Exception as e:
         logger.error("Error connecting to MQTT broker: %s", e)
         return
@@ -315,6 +324,7 @@ def power_laeq_avg(db, logger, sensor_id, table_name=ACOUSTIC_TABLE_NAME):
 def initialize_database(db, logger):
     """Ensure that the database and table exist, recreating them from scratch."""
     cursor = None
+
     try:
         logger.info("Ensuring database and tables exist (recreating tables)…")
         cursor = db.cursor(buffered=True)
@@ -515,14 +525,6 @@ def decimal_to_native(obj):
     if isinstance(obj, decimal.Decimal):
         return float(obj)
     raise TypeError(f"Type {obj.__class__.__name__} not serializable")
-
-
-def load_points():
-
-    points = [point for point in os.listdir(PATH)]
-    points = [os.path.join(PATH, point) for point in points]
-    
-    return points
 
 def get_acoust_and_point(logger,point):
     

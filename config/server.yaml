@@ -9,7 +9,7 @@ paths:
 
   point_coeffs: server_process_app/common/resources/point_coeffs.json
 
-  root_folder = /srv/services/noiseport-server
+  root_folder: /srv/services/noiseport-server
 
 processing:
   wav_folder: wav_files
