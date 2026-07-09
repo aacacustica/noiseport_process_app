@@ -143,6 +143,7 @@ def main():
             # ------------------------- list folders ------------------------ #
 
             device_folder_path              = os.path.join(inbox_folder,device)
+            logger.info(f"inbox folder: {inbox_folder} , device_folder_path: {device_folder_path}")
             acoustic_folder_device          = [f for f in acoustic_folders if device in f.split('/')]
             prediction_folder_device        = [f for f in prediction_folders if device in f.split('/')]
             
