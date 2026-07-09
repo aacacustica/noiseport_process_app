@@ -222,7 +222,7 @@ def main():
         logger.info("all_info: %s", all_info)
         json.dump(all_info, sys.stdout, indent=4, default=decimal_to_native)
 
-        query_acoustic_folder = os.path.join(device,acoustics_folder_name) 
+        query_acoustic_folder = os.path.join(device['id'],acoustics_folder_name) 
         all_info_path = os.path.join(query_acoustic_folder, f"{device}_all.json")
         
         with open(all_info_path, "w") as f:
