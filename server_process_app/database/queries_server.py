@@ -225,7 +225,7 @@ def main():
         json.dump(all_info, sys.stdout, indent=4, default=decimal_to_native)
 
         query_acoustic_folder = os.path.join(device['id'],acoustics_folder_name) 
-        all_info_path = os.path.join(query_acoustic_folder, f"{device}_all.json")
+        all_info_path = os.path.join(query_acoustic_folder, f"{device['id']}_all.json")
         
         with open(all_info_path, "w") as f:
             json.dump(all_info, f, indent=4, default=decimal_to_native)
