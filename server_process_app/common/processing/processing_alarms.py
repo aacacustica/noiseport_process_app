@@ -10,13 +10,13 @@ from pathlib import Path
 import re
 
 
-from noiseport_process_app.server_process_app.common.reading.reading_alarms import *
-from noiseport_process_app.server_process_app.common.utils.utils_vi import *
-from noiseport_process_app.server_process_app.common.config.config_vi import *
-from noiseport_process_app.server_process_app.common.graphics.visualization_alarms import *
-from noiseport_process_app.server_process_app.common.config.settings import *
+from server_process_app.common.reading.reading_alarms import *
+from server_process_app.common.utils.utils_vi import *
+from server_process_app.common.config.config_vi import *
+from server_process_app.common.graphics.visualization_alarms import *
+from server_process_app.common.utils.utils import *
 
-config = load_settings()
+config = load_config()
 
 probability_threshold = config['alarms']['probability_threshold']
 periodo_agregacion = config['alarms'] ['agg_period']

@@ -8,12 +8,13 @@ import pandas as pd
 
 from server_process_app.common.misc.logging_config import *
 from server_process_app.common.config.config import *
-from server_process_app.common.config.settings import settings
+from server_process_app.common.utils.utils import *
 
 logger = setup_logging("query_automatize")
+config = load_config()
 
-CODE_ROOT = settings["root"]
-INBOX_ROOT = Path("/srv/services/inbox")
+CODE_ROOT   = config['paths']['root_folder']
+INBOX_ROOT  = config['paths']['inbox']
 
 TIMESTAMP_CANDIDATES = (
     "Timestamp",

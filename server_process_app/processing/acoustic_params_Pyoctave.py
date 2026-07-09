@@ -18,7 +18,6 @@ from scipy.signal import lfilter
 from server_process_app.common.misc.logging_config import *
 from server_process_app.common.processing.pyoctaveband import *
 from server_process_app.common.utils.utils import *
-from server_process_app.common.config.settings import settings
 
 
 config = load_config()

@@ -3,7 +3,6 @@ from pyfilterbank.octbank import FractionalOctaveFilterbank
 from scipy.fft import fft
 from pathlib import Path
 
-from server_process_app.common.config.settings import settings
 from server_process_app.common.config.settings import config
 
 import numpy as np
@@ -195,11 +194,15 @@ def get_audiofiles(path):
 # -----------------------------------
 
 def load_devices():
-    return [os.path.join(settings.paths.inbox, d["id"]) for d in settings.enabled_devices]
+    
+    inbox_path = config['paths']['inbox']
+    enabled_devices = [device for device in config['devices'] if device.get("enabled",True)]
+    
+    return [os.path.join(inbox_path, d["id"]) for d in enabled_devices]
 
 def load_config():
 
-    return settings
+    return config
 
 def get_enabled_devices() -> list[dict]:
     return [d for d in config["devices"] if d.get("enabled", True)]
@@ -317,20 +320,3 @@ def collect_folders_days_devices(folders,devices):
 
 
     return result
-
-
-def load_devices(devices_folder,logger):
-    """
-    devices_folder: str, path to the txt file that contains the names of the devices to process, one per line.
-
-
-    returns: list of str, full paths to the devices folders to process.
-    """
-    devices = []
-
-    with open(devices_folder, 'r') as f:
-        for line in f:
-            device = line.strip()
-            devices.append(os.path.join(inbox_folder, device))
-
-    return devices

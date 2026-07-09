@@ -11,7 +11,6 @@ from server_process_app.common.misc.time_slop_fix import *
 from server_process_app.common.misc.logging_config import *
 from server_process_app.common.utils.utils import *
 from server_process_app.common.processing.processing_queries import *
-from server_process_app.common.config.settings import settings
 
 config = load_config()
 
@@ -67,11 +66,11 @@ def main():
 
     # ------------------------- config ---------------------------------------- #
 
-    db_host                         = config['mysql']['MYSQL_HOST']
-    db_user                         = config['mysql']['MYSQL_USER']
-    db_password                     = config['mysql']['MYSQL_PASSWORD']
-    db_name                         = config['mysql']['MYSQL_DATABASE']
-    db_local_infile                 = config['mysql']['MYSQL_LOCAL_INFILE']
+    db_host                         = config['mysql']['host']
+    db_user                         = config['mysql']['user']
+    db_password                     = config['mysql']['password']
+    db_name                         = config['mysql']['database']
+    db_local_infile                 = config['mysql']['local_infile']
     db_local_infile_path            = config['paths']['inbox']
     db_init_value                   = config['mysql']['active_switch']
 

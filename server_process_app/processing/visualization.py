@@ -8,13 +8,9 @@ from server_process_app.common.misc.logging_config import *
 from server_process_app.common.config.config_vi import *
 from server_process_app.common.utils.utils import *
 from server_process_app.common.processing.processing_visualizations import *
-from server_process_app.common.config.settings import settings
-
-COEFFS_PATH = settings.paths.coeffs_json
 
 logger = setup_logging('[Visualization]')
 config = load_config()
-
 
 
 def get_taxonomy(taxonomy_selection, urban_taxonomy_map, port_taxonomy_map):
@@ -47,7 +43,7 @@ def main():
     # +----------------------------------------------------------------------+ #    
 
     # ------------------------- config ---------------------------------------- #
-    
+
     audiomoth           = config['visualization']['audiomoth']
     sonometer           = config['visualization']['sonometer']
     raspberry           = config['visualization']['raspberry']
@@ -58,6 +54,8 @@ def main():
     limit_oca           = config['visualization']['limit_oca']
     taxonomy            = config['visualization']['taxonomy']
     change_date         = config['visualization']['change_date']
+
+    coeffs_path         = config['paths']['point_coeffs']
 
     devices                         = config['devices']
 
@@ -107,7 +105,7 @@ def main():
                 logger
             )
 
-            logger.info(f"Processing received data from : {device}")
+            logger.info(f"Processing received data from : {device_name}")
 
         logger.info("Finished all processing.")
 

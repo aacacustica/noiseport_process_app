@@ -20,7 +20,7 @@ from server_process_app.common.misc.logging_config import *
 from server_process_app.common.utils.utils import *
 from server_process_app.common.misc import inference_params as yamnet_params
 from server_process_app.common import yamnet as yamnet_model
-from server_process_app.common.config.settings import settings
+
 
 warnings.filterwarnings("ignore", 
                         message="FNV hashing is not implemented in Numba",
@@ -330,7 +330,6 @@ def main():
     # 1 - PARSE ARGUMENTS & CONFIG
     # ----------------------------
         logging = setup_logging(script_name="inference")
-        args = parse_arguments()
         cwd = os.path.dirname(os.path.realpath(__file__))
         home_dir = os.getenv("HOME")
         model_path,window_size,threshold,upload_s3,path = load_args_config(args.model_path,args.point,args.window_size,args.threshold,args.upload_S3,home_dir,args.path)

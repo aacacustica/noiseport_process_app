@@ -3,7 +3,7 @@ import os
 import yaml
 from dotenv import load_dotenv
 
-ROOT_DIR = Path(__file__).resolve().parents[2]
+ROOT_DIR = Path(__file__).resolve().parents[3]
 
 load_dotenv(ROOT_DIR / ".env")
 
@@ -44,8 +44,8 @@ def load_settings() -> dict:
             "user": os.getenv("MYSQL_USER"),
             "password": os.getenv("MYSQL_PASSWORD"),
             "database": os.getenv("MYSQL_DATABASE"),
-            "local_infile": True if os.getenv("MYSQL_LOCAL_INFILE") == 1 else False,
-            "active_switch": True if os.getenv("MYSQL_USE_SWITCH") == 1 else False
+            "local_infile": os.getenv("MYSQL_LOCAL_INFILE", "0") == "1",
+            "local_infile": os.getenv("MYSQL_LOCAL_INFILE", "0") == "1"
         },
         "devices": devices.get("devices", []),
     }
