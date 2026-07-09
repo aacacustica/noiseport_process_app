@@ -227,7 +227,7 @@ def main():
         query_acoustic_folder = os.path.join(device['id'],acoustics_folder_name) 
         all_info_path = os.path.join(query_acoustic_folder, f"{device['id']}_all.json")
         
-        with open(all_info_path, "w+") as f:
+        with open(all_info_path, "a+") as f:
             json.dump(all_info, f, indent=4, default=decimal_to_native)
         
         logger.info("Saved all_info to: %s", all_info_path)
