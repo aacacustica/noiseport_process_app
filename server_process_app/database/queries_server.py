@@ -217,6 +217,8 @@ def main():
 
     for device in devices:
 
+        if not device['enabled']: continue
+        
         logger.info("")
         logger.info("Saving all_info to JSON")
         logger.info("all_info: %s", all_info)
