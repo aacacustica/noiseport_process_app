@@ -45,7 +45,7 @@ def load_settings() -> dict:
             "password": os.getenv("MYSQL_PASSWORD"),
             "database": os.getenv("MYSQL_DATABASE"),
             "local_infile": os.getenv("MYSQL_LOCAL_INFILE", "0") == "1",
-            "local_infile": os.getenv("MYSQL_LOCAL_INFILE", "0") == "1",
+            "active_switch": os.getenv("MYSQL_USE_SWITCH", "0") == "1",
             "querys": QUERYS,
             "tables":TABLES
         },
