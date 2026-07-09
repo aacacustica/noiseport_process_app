@@ -13,12 +13,12 @@ paths:
 
 processing:
   wav_folder: wav_files
-  acoustic_folder: acoustic_params
-  prediction_folder: prediction_files
+  acoustic_folder: acoustics
+  prediction_folder: predictions
   sonometer_folder: sonometer_files
 
-  acoustic_queries_folder: acoustic_params_query
-  prediction_queries_folder: prediction_files_query
+  acoustic_queries_folder: acoustic_queries
+  prediction_queries_folder: prediction_queries
   peaks_folder: peaks_query
   merged_folder: merged_csv_files
 
