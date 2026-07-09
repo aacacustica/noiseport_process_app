@@ -47,16 +47,17 @@ def main():
     # +----------------------------------------------------------------------+ #    
 
     # ------------------------- config ---------------------------------------- #
-    audiomoth = config['visualization']['audiomoth']
-    sonometer = config['visualization']['sonometer']
-    raspberry = config['visualization']['raspberry']
+    
+    audiomoth           = config['visualization']['audiomoth']
+    sonometer           = config['visualization']['sonometer']
+    raspberry           = config['visualization']['raspberry']
 
-    filter_point = config['visualization']['filterpoint']
-    agg_period = config['visualization']['agg_period']
-    percentiles = config['visualization']['percentiles']
-    limit_oca = config['visualization']['limit_oca']
-    taxonomy = config['visualization']['taxonomy']
-    change_date = config['visualization']['change_date']
+    filter_point        = config['visualization']['filterpoint']
+    agg_period          = config['visualization']['agg_period']
+    percentiles         = config['visualization']['percentiles']
+    limit_oca           = config['visualization']['limit_oca']
+    taxonomy            = config['visualization']['taxonomy']
+    change_date         = config['visualization']['change_date']
 
     devices                         = config['devices']
 

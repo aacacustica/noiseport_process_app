@@ -60,7 +60,7 @@ def main():
     devices_ids             = [device['id'] for device in devices if device['enabled'] == True]
     devices_folder_paths    = [os.path.join(inbox_folder,device['id']) for device in devices if device['enabled'] == True]
     enabled_devices         = [device['id'] for device in devices if device['enabled'] == True]
-    taxonomy = mode
+    taxonomy                = mode
 
     try:
         

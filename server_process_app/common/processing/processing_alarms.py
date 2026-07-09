@@ -234,44 +234,46 @@ def process_all_folders(folders,day_devices,yamnet_csv,  oca_limits, logger):
     #    ]]
     for device,device_state in day_devices.items():
         
-        # +------------------------------------------------------------+ #
-        #   LOOP for each device in day_devices:                         #
-        #        1. Comprobar si el dispositivo completo ya fue procesado#
-        #        2. Comprobar si hay una carpeta creada para el disp.    #
-        #        3. Comprobar si existen csvs en el dispositivo          #
-        #        3. LOOP device[csv_files]                               #
-        #           3.1 Comprobar el csv ya fue procesado                #
-        #           3.2 Llamada a process single_file_csv                #   
-        #           3.3 Si da error no se marca como procesado y retry   #
-        #           3.4 Si no da error se marca como procesado           #
-        #        3. device['processed] = True si todos sus csvs procesados#
-        #                                                                #
-        # +------------------------------------------------------------+ #
+    # +------------------------------------------------------------+ #
+    #   LOOP for each device in day_devices:                         #
+    #        1. Comprobar si el dispositivo completo ya fue procesado#
+    #        2. Comprobar si hay una carpeta creada para el disp.    #
+    #        3. Comprobar si existen csvs en el dispositivo          #
+    #        3. LOOP device[csv_files]                               #
+    #           3.1 Comprobar el csv ya fue procesado                #
+    #           3.2 Llamada a process single_file_csv                #   
+    #           3.3 Si da error no se marca como procesado y retry   #
+    #           3.4 Si no da error se marca como procesado           #
+    #        3. device['processed] = True si todos sus csvs procesados#
+    #                                                                #
+    # +------------------------------------------------------------+ #
 
+    # ------------------------- Comprobar si el dispositivo completo ya fue procesado ------------------------ #
         if device_state.get("processed",False): 
             logger.info(f"Skipping device {device}:all CSV files are already processed")
             continue
-
+    
+    # ------------------------- Comprobar si hay una carpeta creada para el disp ----------------------------- #
         folder = folders_by_device.get(device)
         
         if folder is None:
             logger.error(f"Folder not found for device: {device}")
             continue
-        
+    # ------------------------- Comprobar si existen csvs en el dispositivo ---------------------------------- #    
         csv_states = device_state.get("files",[])
 
         if not csv_states:
             logger.warning(f"No CSV files registered for device: {device}")
             continue
-            
+    # ------------------------- LOOP device[csv_files] ------------------------------------------------------- #        
         for csv_state in csv_states:
-
+    # ------------------------- Comprobar el csv ya fue procesado -------------------------------------------- # 
             if csv_state.get("processed",False):
                 logger.info(f"Skipping already processed CSV: {csv_state['path']}")
                 continue
             csv_path = Path(csv_state['Path'])
             if not csv_path.is_absolute(): csv_path = folder / csv_path
-
+    # ------------------------- Procesar CSV ------------------------------------------------------------------ # 
             try:
                 process_single_csv(
                     csv_path    = csv_path,
@@ -283,10 +285,12 @@ def process_all_folders(folders,day_devices,yamnet_csv,  oca_limits, logger):
                     logger      = logger
                 )
             except Exception as e:
+    # ------------------------- Si da error no se marca como procesado y se volverá a intentar ---------------- # 
                 logger.exception(f"CSV processing failed: {csv_path} with exception: {e}")
             else:
+    # ------------------------- Si no da error se marca como procesado  --------------------------------------- #
                 csv_state['processed']  =   True
-        
+    # ------------------------- device['processed] = True si todos sus csvs procesados ------------------------ #
         device_state["processed"] = (
             bool(csv_states)
             and all(

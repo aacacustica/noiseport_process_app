@@ -18,7 +18,7 @@ processing:
   acoustic_queries_folder: acoustic_params_query
   prediction_queries_folder: prediction_files_query
   peaks_folder: peaks_query
-  merged_folder: merged
+  merged_folder: merged_csv_files
 
   fixed_prefix: fixed_
   expected_wavs_per_hour: 60
@@ -66,15 +66,21 @@ alarms:
   agg_period: 900
   percentiles: [90, 10]
   probability_threshold: 0.3
+  audiomoth: true
+  sonometer: false
+  raspberry: false
 
 visualization:
   agg_period: 900
   percentiles: [90, 10]
   limit_oca: OCA_RESIDENTIAL
   taxonomy: port
-  filter_point: 
-  mode:                                                                                                 # VISUALIZATION urban | port
-  change_date: false                                                                                     # true | false (default)                               
+  filter_point: null
+  mode:                                                                                                   # VISUALIZATION urban | port
+  change_date: false                                                                                      # true | false (default)                               
+  audiomoth: true
+  sonometer: false
+  raspberry: false
 
 pipeline:
   enabled_steps:
