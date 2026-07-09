@@ -577,8 +577,8 @@ def get_sonometer_rasp_acoustics_preds_days_and_paths(logger,point):
 def get_sonometer_rasp_acoustics_preds_days_and_paths_server_version(logger,device):
 
     
-    acoustics_params_folder_path = os.path.join(config['paths']['inbox_folder'],device,config['acoustic_folder'])
-    predictions_litle_folder_path = os.path.join(config['paths']['inbox_folder'],device,config['predictions_folder'])
+    acoustics_params_folder_path = os.path.join(config['paths']['inbox_folder'],device,config['paths']['acoustic_folder'])
+    predictions_litle_folder_path = os.path.join(config['paths']['inbox_folder'],device,config['paths']['predictions_folder'])
 
 
     days_folders_acoustics = [os.path.join(acoustics_params_folder_path, day) for day in os.listdir(acoustics_params_folder_path) if 'fixed_' in day ]
