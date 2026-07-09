@@ -122,7 +122,7 @@ def main():
     logger.info(f"[Queries] Devices to query: {devices}")
     logger.info(f"[Queries] Info located in {acoustic_folders} , {prediction_folders}")
 
-    all_info = []
+    
 
     for device in tqdm.tqdm(devices_ids, desc="Processing devices", unit="device"):
         
@@ -202,19 +202,14 @@ def main():
             if sonometer_query_switch: None
             if wav_query_switch: None
 
-            # ------------------------- Save all_info to JSON -----------------------#
-
-
-
-
-
-            
+           
+       
         except Exception as e:
             logger.info(f"Error processing:{device} , {e}")
 
         
     # ------------------------- Add processed folder to all_info ----------- #
-
+    """
     for device in devices:
 
         if not device['enabled']: continue
@@ -232,7 +227,7 @@ def main():
         
         logger.info("Saved all_info to: %s", all_info_path)
         
-
+    """
     # ------------------------- Close DB ------------------------------------- #
     
 
