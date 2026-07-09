@@ -38,18 +38,18 @@ def arg_parser():
     return parser.parse_args()
 
 
-def acoustic_processing(folder_days,db,logger, all_info, query_acoustic_folder, processed_acoustics, processed_folder_acoustic_txt,device):
+def acoustic_processing(folder_days,db,logger, query_acoustic_folder, processed_acoustics, processed_folder_acoustic_txt,device):
     
     start_time = time.time()                 
-    process_acoustic_folder(db,logger,folder_days, all_info, query_acoustic_folder, processed_acoustics, processed_folder_acoustic_txt,device)                   
+    process_acoustic_folder(db,logger,folder_days, query_acoustic_folder, processed_acoustics, processed_folder_acoustic_txt,device)                   
     end_time =  round(time.time() - start_time,2)
     return end_time
 
 
-def prediction_processing(folder_days,db,logger, all_info, query_pred_folder, processed_predictions, processed_folder_predictions_txt,device):
+def prediction_processing(folder_days,db,logger, query_pred_folder, processed_predictions, processed_folder_predictions_txt,device):
     
     start_time = time.time()
-    process_pred_folder(db,logger,folder_days, all_info, query_pred_folder, processed_predictions, processed_folder_predictions_txt,device)                 
+    process_pred_folder(db,logger,folder_days,query_pred_folder, processed_predictions, processed_folder_predictions_txt,device)                 
     end_time =  round(time.time() - start_time,2)
     return end_time
 
@@ -193,12 +193,12 @@ def main():
                 
             if acoustic_query_switch:
                     
-                    acoustic_processing(days_folders_acoustics,db,logger,all_info,query_acoustic_folder,processed_acoustics_list,processed_folder_acoustic_txt_path,device)    
+                    acoustic_processing(days_folders_acoustics,db,logger,query_acoustic_folder,processed_acoustics_list,processed_folder_acoustic_txt_path,device)    
                     if send_mqtt:
                         power_avg_results = power_laeq_avg(db,logger,device,acoustic_table_name)
                         send_mqtt_data(power_avg_results,logger,processed_mqtt_data_txt_path)              
                     
-            if prediction_query_switch: prediction_processing(days_folders_predictions,db,logger,all_info,query_pred_folder,processed_predictions_list,processed_folder_acoustic_txt_path,device)
+            if prediction_query_switch: prediction_processing(days_folders_predictions,db,logger,query_pred_folder,processed_predictions_list,processed_folder_acoustic_txt_path,device)
             if sonometer_query_switch: None
             if wav_query_switch: None
 
