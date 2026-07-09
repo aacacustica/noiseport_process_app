@@ -383,7 +383,12 @@ def load_data_db(db, data_path, logger,device, table_name=ACOUSTIC_TABLE_NAME):
                 table_name=table_name,
                 device_id=device.replace("'", "\\'")
             )
-    
+        elif table_name == PREDICT_TABLE_NAME:
+            return True
+        elif table_name == WAV_TABLE_NAME:
+            return True
+        elif table_name == SONOMETER_TABLE_NAME:
+            return True
     
     
     try:
