@@ -84,7 +84,7 @@ def main():
     prediction_table_name           = config['queries']['predictions_table_name']
     sonometer_table_name            = config['queries']['sonometer_table_name']
     wav_table_name                  = config['queries']['wav_table_name']
-    time_slop_apply                 = config['queries']['time_slop']
+    time_slop_apply                 = config['queries']['time_slop_fix']
     send_mqtt                       = config['queries']['send_mqtt']
 
     inbox_folder                    = config['paths']['inbox']
