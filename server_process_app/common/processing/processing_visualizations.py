@@ -231,6 +231,8 @@ def process_all_folders(input_folder, device_folders, PERIODO_AGREGACION, PERCEN
                     logger.warning(f"df is None")
                     continue
             """
+            logger.info(f"Resultados dir: {resultados_dir}")
+            logger.info(f"Content of resultados dir: {os.listdir(resultados_dir)}")
             dfs_acoustics,dfs_predictions,dfs_peaks,dfs_merged = collect_df_server(resultados_dir)
             # taking just 1 day, which are the first 86400 rows
             # df = df.iloc[:86400] # 1 day of data, 24 hours * 60 minutes * 60 seconds = 86400 seconds
