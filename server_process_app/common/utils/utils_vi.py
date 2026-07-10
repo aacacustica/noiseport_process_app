@@ -850,3 +850,114 @@ def collect_folders(input_folder, change_time_flag,label_source_type, logger,poi
 
     return folders, coefficients, date_time, threshold
 
+def leq_safe(series):
+    vals = series.dropna().values
+    if len(vals) == 0:
+        return pd.NA
+    return leq(vals)
+
+def agg_hour(group):
+    result = {}
+    
+    if "id_micro" in group.columns:
+        ids = group["id_micro"].dropna()
+        if not ids.empty:
+            result["id_micro"] = ids.iloc[0]
+        else:
+            result["id_micro"] = pd.NA
+
+    """
+    leq_cols = [
+        "LA", "LC", "LZ", "LAmax", "LAmin",
+        "12.6Hz", "15.8Hz", "20.0Hz", "25.1Hz", "31.6Hz", "39.8Hz",
+        "50.1Hz", "63.1Hz", "79.4Hz", "100.0Hz", "125.9Hz", "158.5Hz",
+        "199.5Hz", "251.2Hz", "316.2Hz", "398.1Hz", "501.2Hz", "631.0Hz",
+        "794.3Hz", "1000.0Hz", "1258.9Hz", "1584.9Hz", "1995.3Hz",
+        "2511.9Hz", "3162.3Hz", "3981.1Hz", "5011.9Hz", "6309.6Hz",
+        "7943.3Hz", "10000.0Hz", "12589.3Hz", "15848.9Hz",
+        "peak_leq",
+    ]
+    """
+    leq_cols_V2 = [
+    "LA", "LC", "LZ", "LAmax", "LAmin",
+
+    "12.59Hz",
+    "15.85Hz",
+    "19.95Hz",
+    "25.12Hz",
+    "31.62Hz",
+    "39.81Hz",
+
+    "50.12Hz",
+    "63.1Hz",
+    "79.43Hz",
+    "100.00Hz",
+    "125.89Hz",
+    "158.49Hz",
+
+    "199.53Hz",
+    "251.19Hz",
+    "316.23Hz",
+    "398.11Hz",
+    "501.19Hz",
+    "630.96Hz",
+    "794.33Hz",
+    "1000.00Hz",
+    "1258.93Hz",
+
+    "1584.89Hz",
+    "1995.26Hz",
+    "2511.89Hz",
+    "3162.28Hz",
+    "3981.07Hz",
+    "5011.87Hz",
+    "6309.57Hz",
+    "7943.3Hz",
+
+    "10000.00Hz",
+    "12589.25Hz",
+    "15848.93Hz",
+
+    "peak_leq",
+    ]
+    for col in leq_cols_V2:
+        if col in group:
+            result[col] = leq_safe(group[col])
+
+
+    if "LA" in group:
+        vals = group["LA"].dropna().values
+        if len(vals) > 0:
+            result["90percentile"] = np.percentile(vals, 90)
+        else:
+            result["90percentile"] = pd.NA
+
+    # average
+    if "LC-LA" in group:
+        result["LC-LA_mean"] = group["LC-LA"].mean()
+
+
+    # n peaks per hour
+    if "is_peak" in group:
+        result["n_peaks"] = group["is_peak"].fillna(0).astype(bool).sum()
+
+
+    # clase mas repetida
+    if "NoisePort_Level_1" in group:
+        cats = group["NoisePort_Level_1"].dropna()
+        if not cats.empty:
+            mode_cats = cats.mode()
+            result["NoisePort_Level_1_mode"] = mode_cats.iloc[0]
+        else:
+            result["NoisePort_Level_1_mode"] = pd.NA
+
+    if "Prediction_1" in group:
+        cats = group["Prediction_1"].dropna()
+        if not cats.empty:
+            mode_cats = cats.mode()
+            result["Prediction_1_mode"] = mode_cats.iloc[0]
+        else:
+            result["Prediction_1_mode"] = pd.NA
+
+    return pd.Series(result)
+

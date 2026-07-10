@@ -163,7 +163,7 @@ def process_single_csv( csv_path,device,folder,yamnet_df,yamnet_csv,oca_limits,l
             type(periodo_agregacion).__name__,
             callable(periodo_agregacion),
         )
-        df_1h = df.resample("1h").apply(periodo_agregacion)
+        df_1h = df.resample("1h").apply(agg_hour)
         df_1h = df_1h.reset_index()
         df_1h = df_1h.round(1)
 
