@@ -225,13 +225,12 @@ def get_hourly_folders_device(device_folder_path,predictions_query_folder_name,p
     hour_path_acoustics = []
     hour_path_predictions = []
     hour_path_peaks = []
-    
-
-                    
+                       
     predictions_params_query = os.path.join(device_folder_path,predictions_query_folder_name)
     peaks_params_query = os.path.join(device_folder_path,peaks_query_folder_name)
     acoustic_params_query = os.path.join(device_folder_path,acoustics_query_folder_name)
 
+    
     if not os.path.exists(peaks_params_query): os.makedirs(peaks_params_query)
 
     for file in os.listdir(acoustic_params_query):
