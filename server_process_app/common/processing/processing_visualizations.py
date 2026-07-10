@@ -143,12 +143,12 @@ def process_all_folders(input_folder, device_folders, PERIODO_AGREGACION, PERCEN
         try:
             reg_folder = os.path.join(input_folder, folder) # \\192.168.205.117\AAC_Server\INDUSTRIA\23132-IRUÑA_OCA_CANTERA\5-Resultados\FAA205-P1_CAMPAÑA1\SPL
             folder = folder.split("/")[-2]
-            logger.info(f"Entering folder: {folder}")
+
             actual_folder_name = folder[-1]
             #folder = folder.split("\\")[:-1]
             #folder = os.path.join('\\\\', *folder)
             #actual_folder_name = folder.split("\\")[-1]
-            logger.info(f"Processing folder: {actual_folder_name}")
+            logger.info(f"Processing folder: {folder}")
             
 
 
@@ -594,7 +594,7 @@ def process_all_folders(input_folder, device_folders, PERIODO_AGREGACION, PERCEN
                     ##################################
                     logger.info("")
                     logger.info(f"Applying find_peaks function to the whole dataframe")
-                    df_peaks_csv_path = os.path.join(folder_output_dir, f"{actual_folder_name}_peaks_filtered.csv")
+                    df_peaks_csv_path = os.path.join(folder_output_dir, f"{folder}_peaks_filtered.csv")
                     
                     # if os.path.exists(df_peaks_csv_path):
                     #     logger.info(f"File {df_peaks_csv_path} already exists, skipping peaks analysis")
@@ -680,7 +680,7 @@ def process_all_folders(input_folder, device_folders, PERIODO_AGREGACION, PERCEN
 
 
                     # check if the file exists
-                    df_1h_csv_path = os.path.join(folder_output_dir_1h, f"{actual_folder_name}_1h.csv")
+                    df_1h_csv_path = os.path.join(folder_output_dir_1h, f"{folder}_1h.csv")
                     # if os.path.exists(df_1h_csv_path):
                     #     logger.info(f"File {df_1h_csv_path} already exists, skipping transformation")
                     #     df_1h = pd.read_csv(df_1h_csv_path)
@@ -738,7 +738,7 @@ def process_all_folders(input_folder, device_folders, PERIODO_AGREGACION, PERCEN
 
                 try:
                         ############# MERGING PEAKS WITH ACOUSTIC PREDICTION DATAFRAME ##################
-                    acoustic_pred_peak_csv_path = os.path.join(ai_prediction_folder, f"{actual_folder_name}_acoustic_pred_peak_test.csv")
+                    acoustic_pred_peak_csv_path = os.path.join(ai_prediction_folder, f"{folder}_acoustic_pred_peak_test.csv")
                     # if os.path.exists(acoustic_pred_peak_csv_path):
                     #     logger.info(f"[2] File {acoustic_pred_peak_csv_path} already exists, skipping merge")
                     #     df_all = pd.read_csv(acoustic_pred_peak_csv_path)
@@ -1121,7 +1121,7 @@ def process_all_folders(input_folder, device_folders, PERIODO_AGREGACION, PERCEN
                 logger.info(f"SAVING THE ALARMS CSV FILE")
 
                 try:
-                    alarms_csv_path = os.path.join(folder_output_dir_1h, f"{actual_folder_name}_full_alarms.csv")
+                    alarms_csv_path = os.path.join(folder_output_dir_1h, f"{folder}_full_alarms.csv")
                     df_alarms_1h.to_csv(alarms_csv_path, index=False)
                     logger.info(f"Saved alarms dataframe to {alarms_csv_path}")
 
