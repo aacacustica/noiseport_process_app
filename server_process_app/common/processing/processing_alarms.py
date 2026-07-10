@@ -106,7 +106,7 @@ def process_single_csv( csv_path,device,folder,yamnet_df,yamnet_csv,oca_limits,l
     # ------------------------- Añadir columna datetime --------------------------------------------- #
     try:
         if df is None:
-            logger.Exception(f"DF from {csv_path} is none")
+            logger.exception(f"DF from {csv_path} is none")
             return
 
         df = add_datetime_columns(df,logger,date_col='datetime')
@@ -117,7 +117,7 @@ def process_single_csv( csv_path,device,folder,yamnet_df,yamnet_csv,oca_limits,l
 
         logger.info(f"Start date and end date are [{start_date} ,{end_date}]")
 
-    except Exception as e: logger.Exception(f"Exception adding datetime columns {e}")
+    except Exception as e: logger.exception(f"Exception adding datetime columns {e}")
 
     # ------------------------- Añadir columna indicators, night y oca ------------------------------- #
     try:
