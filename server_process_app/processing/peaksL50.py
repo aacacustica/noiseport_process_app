@@ -132,7 +132,7 @@ def main():
         hourly_acoustics_folders,hourly_predictions_folders,hourly_peaks_folders = list(get_hourly_folders_device(device,predictions_folder_name,peaks_folder_name,acoustics_folder_name))
 
         # ------------------------- Merge peak,acoustic and prediction csvs----------------------------------------------------------- #
-        merge_acoustics_predictions_and_peaks(None,hourly_acoustics_folders,hourly_predictions_folders,hourly_peaks_folders,devices,logger)
+        merge_acoustics_predictions_and_peaks(hourly_acoustics_folders,hourly_predictions_folders,hourly_peaks_folders,logger)
     
     except Exception as e:
         logger.error(f"Error concatenating acoustics predictions and peaks: {e}")
