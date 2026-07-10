@@ -545,7 +545,7 @@ def process_all_folders(input_folder, device_folders, PERIODO_AGREGACION, PERCEN
                     df_prediction_alarms['probability'] = (df_prediction_alarms['probability_list'].apply(lambda values: (float(values[0]) if values and pf.notna(values[0]) else 0.0)))
                     df_prediction_alarms = df_prediction_alarms[df_prediction_alarms['probability'] >= PROBABILITY_THRESHOLD].copy()
                     
-                    yamnet_csv_renamed = yamnet_csv.rename(columns='display_name':"class")
+                    yamnet_csv_renamed = yamnet_csv.rename(columns={"display_name": "class"})
 
                     df_prediction_alarms_mapped = (df_prediction_alarms.merge(yamnet_csv_renamed,on='class',how='left'))
 
