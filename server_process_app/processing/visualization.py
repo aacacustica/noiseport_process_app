@@ -48,7 +48,7 @@ def main():
     sonometer           = config['visualization']['sonometer']
     raspberry           = config['visualization']['raspberry']
 
-    filter_point        = config['visualization']['filterpoint']
+    filter_point        = config['visualization']['filter_point']
     agg_period          = config['visualization']['agg_period']
     percentiles         = config['visualization']['percentiles']
     limit_oca           = config['visualization']['limit_oca']
