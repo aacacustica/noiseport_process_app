@@ -74,7 +74,7 @@ def main():
         
         process_all_folders(
             folders             = folders,
-            day_devices        = sorted(days_devices),
+            day_devices         = days_devices,
             yamnet_csv          = yamnet_csv,
             oca_limits          = oca_limits,
             logger              = logger
