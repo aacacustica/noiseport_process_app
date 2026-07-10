@@ -172,7 +172,7 @@ def process_single_csv( csv_path,device,folder,yamnet_df,yamnet_csv,oca_limits,l
 
     # ------------------------- Creación de alarmas ---------------------------------------------------- #
 
-    try: df_alarms_1h = oca_alarm(df_alarms_1h, logger=logger)
+    try: df_alarms_1h = oca_alarm(df_1h, logger=logger)
     except Exception as e: logger.exception(f"Exception while creating OCA alarm: {e} in file : {csv_path}")
 
     try: df_alarms_1h = lmax_alarm(df_alarms_1h, logger=logger, threshold=95)
