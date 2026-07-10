@@ -232,7 +232,7 @@ def process_all_folders(input_folder, device_folders, PERIODO_AGREGACION, PERCEN
                     continue
             """
 
-            dfs_acoustics,dfs_predictions,dfs_peaks,dfs_merged = collect_df_server(resultados_dir)
+            file_groups = collect_df_server(resultados_dir)
 
             # taking just 1 day, which are the first 86400 rows
             # df = df.iloc[:86400] # 1 day of data, 24 hours * 60 minutes * 60 seconds = 86400 seconds
@@ -255,8 +255,10 @@ def process_all_folders(input_folder, device_folders, PERIODO_AGREGACION, PERCEN
                 continue
             ###################################################################
             """
-            for df_path,df_prediction_path,df_peaks_path,df_all_path in zip(dfs_acoustics,dfs_predictions,dfs_peaks,dfs_merged):
+            for (processing_date,df_path,df_prediction_path,df_peaks_path,df_all_path) in file_groups:
                 
+                logger.info("Processing date: %s", processing_date)
+
                 df = pd.read_csv(df_path)
                 df_prediction = pd.read_csv(df_prediction_path)
                 df_peaks = pd.read_csv(df_peaks_path)
@@ -280,6 +282,7 @@ def process_all_folders(input_folder, device_folders, PERIODO_AGREGACION, PERCEN
                 logger.info(f"Merged : {csv_merged_basename}")
                 
                 logger.info("")
+                
                 if TENERIFE_TIMEZONE:
                     df['Timestamp'] = pd.to_datetime(df['Timestamp']) - pd.Timedelta(hours=1)
                     logger.info(f"Time zone was set to Tenerife")
@@ -294,7 +297,7 @@ def process_all_folders(input_folder, device_folders, PERIODO_AGREGACION, PERCEN
                         logger.info(f"FOR SPL FILE: Adding datetime columns, sorting by datetime and setting datetime as index")
                         df = add_datetime_columns(df,logger, date_col='datetime')
                         df = df.sort_values('Timestamp')
-                        df.set_index('Timestamp', inplace=True, drop=False)
+                        df.set_index('Timestamp',drop=True)
                         start_date = df.index[0]
                         end_date = df.index[-1]
 
@@ -310,9 +313,9 @@ def process_all_folders(input_folder, device_folders, PERIODO_AGREGACION, PERCEN
                         logger.info("")
                         logger.info(f"FOR PREDICTION FILE: Adding datetime columns, sorting by datetime and setting datetime as index")
                         
-                        df_prediction = add_datetime_columns(df_prediction, logger, date_col='Timestamp')
-                        df_prediction = df_prediction.sort_values('Timestamp')
-                        df_prediction.set_index('Timestamp', inplace=True, drop=False)
+                        df_prediction = add_datetime_columns( df_prediction,logger,date_col="Timestamp")
+                        df_prediction = df_prediction.sort_values("Timestamp")
+                        df_prediction = df_prediction.set_index("Timestmap",drop=True)
                         pred_start_date = df_prediction.index[0]
                         pred_end_date = df_prediction.index[-1]
 
@@ -329,28 +332,31 @@ def process_all_folders(input_folder, device_folders, PERIODO_AGREGACION, PERCEN
                     logger.info("")
                     if df is not None:
                         # drop the beginning and ending of the measurement (15min)
-                        df = df.loc[start_date + pd.Timedelta(REMOVE_START_TIME, unit='seconds'):end_date - pd.Timedelta(REMOVE_END_TIME, unit='seconds')]
+                        df = trim_dataframe(df,REMOVE_START_TIME,REMOVE_END_TIME,logger,"SPL")
+                        
                         logger.info(f"SPL df was trimmed, {REMOVE_START_TIME} secs from the beggining and {REMOVE_END_TIME} secs from the end")
                     
                     if df_prediction is not None:
-                        df_prediction = df_prediction.loc[pred_start_date + pd.Timedelta(REMOVE_START_TIME, unit='seconds'):pred_end_date - pd.Timedelta(REMOVE_END_TIME, unit='seconds')]
+                        df_prediction = trim_dataframe(df_prediction,REMOVE_START_TIME,REMOVE_END_TIME,logger,"Prediction")
                         logger.info(f"Prediction df was trimmed, {REMOVE_START_TIME} secs from the beggining and {REMOVE_END_TIME} secs from the end")
 
 
                     # add indicators column
-                    if df is not None:
-                        logger.info(f"Adding indicators column")
-                        df['indicador_str'] = df.apply(lambda x: evaluation_period_str(x['hour']), axis=1)
-                    if df_prediction is not None:
-                        df_prediction['indicador_str'] = df_prediction.apply(lambda x: evaluation_period_str(x['hour']), axis=1)
+                    if df is not None and not df.empty:
+                        logger.info(f"Adding indicators column to acoustic dataframe")
+                        df['indicador_str'] = df['hour'].map(evaluation_period_str)
+                    if df_prediction is not None and not df_prediction.empty:
+                        logger.info(f"Adding indicators column to predictions dataframe")
+                        df_prediction['indicador_str'] = (df_prediction['hour'].map(evaluation_period_str))
 
                     
                     # add nights column
-                    if df is not None:
-                        logger.info(f"Adding nights column")
-                        df['night_str'] = df.apply(lambda x: add_night_column(x['hour'], x['day_name']), axis=1)
-                    if df_prediction is not None:
-                        df_prediction['night_str'] = df_prediction.apply(lambda x: add_night_column(x['hour'], x['day_name']), axis=1)
+                    if df is not None and not df.empty:
+                        logger.info(f"Adding nights column to acoustic dataframe")
+                        df['night_str'] = [add_night_column(hour,day_name) for hour, day_name in zip(df['hour'],df['day_name'])]
+
+                    if df_prediction is not None and not df_prediction.empty:
+                        df_prediction['night_str'] = [add_night_column(hour,day_name) for hour, day_name in zip(df_prediction['hour'],df_prediction['day_name'])]
 
                 except Exception as e:
                     logger.error(f"An error occurred while adding indicators and nights columns: {e}")
@@ -560,20 +566,15 @@ def process_all_folders(input_folder, device_folders, PERIODO_AGREGACION, PERCEN
                     else: continue
                     df_prediction_alarms_mapped['Timestamp'] = pd.to_datetime(df_prediction_alarms_mapped['Timestamp'])
                     if df is not None:
-                        if temporal_bool:
-                            if df_prediction_alarms.index.name == "Timestamp":
-                                df_prediction_alarms_mapped = df_prediction_alarms_mapped.reset_index(drop=True)
-                                df_prediction_alarms_mapped["Timestamp"] = pd.to_datetime(df_prediction_alarms_mapped["Timestamp"],utc=True)
 
-                                df = df.reset_index(drop=True)
-                                df["Timestamp"] = pd.to_datetime(df["Timestamp"],utc=True)
-                        df = df.merge(
-                            df_prediction_alarms_mapped[['Timestamp', 'class', 'probability', 'NoisePort_Level_1']],
-                            left_on='Timestamp',
-                            right_on='Timestamp',
-                            how='left'
-                        )
-                    df.drop(columns=['Timestamp_y'], inplace=True, errors='ignore')
+                        df_for_merge = df.reset_index()
+                        prediction_for_merge = df_prediction_alarms_mapped.reset_index()
+                        df_for_merge['Timestamp'] = pd.to_datetime(df_for_merge['Timestamp'],utc=True)
+                        prediction_for_merge['Timestamp'] = pd.to_datetime(prediction_for_merge['Timestamp'],utc=True)
+                        df = df_for_merge.merge(prediction_for_merge[["Timestamp","class","probability","NoisePort_Level_1"]],on="Timestamp",how="left")
+                        df = df.set_index("Timestamp",drop=True)
+
+                    
                     df.rename(columns={'Timestamp_x': 'Timestamp'}, inplace=True, errors='ignore')
                     logger.info("Added the prediction data to the main dataframe")
 
@@ -610,12 +611,13 @@ def process_all_folders(input_folder, device_folders, PERIODO_AGREGACION, PERCEN
                         logger.info("")
                         logger.info(f"Rolling the data with a window of {WINDOW_SIZE} seconds")
                         # rolling median for the LA values with a window of 30 seconds
-                        df_peaks['LA_cor_median'] = df_peaks['LA_corrected'].rolling(window=WINDOW_SIZE, min_periods=1).quantile(0.5) + ADDING_THRESHOLD
+                        level_column = resolve_acoustic_level_column(df_peaks)
+                        df_peaks['LA_cor_median'] = df_peaks[level_column].rolling(window=WINDOW_SIZE, min_periods=1).quantile(0.5) + ADDING_THRESHOLD
                         df_peaks['Peak'] = 1
 
                         #above threshold
                         logger.info(f"Calculating peaks above threshold")
-                        df_peaks = df_peaks[df_peaks['LA_corrected'] > df_peaks['LA_cor_median']]
+                        df_peaks = df_peaks[df_peaks[level_column] > df_peaks['LA_cor_median']]
                         logger.info(f"There are {len(df_peaks)} peaks in the dataframe after filtering")
                         # 
 
@@ -657,7 +659,7 @@ def process_all_folders(input_folder, device_folders, PERIODO_AGREGACION, PERCEN
                     logger.error(f"An error occurred while merging the peak df and the acoustic dataframe {e}")
                     continue
 
-                
+
 
                 ################################################################
                 ################################################################

@@ -5,6 +5,8 @@ import subprocess
 import os
 import json
 
+from pandas.api.types import is_datetime64_any_dtype
+
 from server_process_app.common.config.config_vi import *
 from server_process_app.common.utils.utils import * 
 
@@ -14,23 +16,53 @@ RELATIVE_PATH_YAMNET_MAP = config['models']['yamnet_class_map']
 RELATIVE_PATH_TAXONOMY_PORT = config['models']['urban_taxonomy_mapping']
 RELATIVE_PATH_TAXONOMY_URBAN = config['models']['port_taxonomy_mapping']
 
+def extract_file_date(path):
+    match = re.search(r"(\d{8})",Path(path).stem)
+    return match.group(1) if match else None
+
+def map_files_by_date(files):
+    result = {}
+
+    for file_path in files:
+        date = extract_file_date(file_path)
+        if date:
+            result[date] = file_path
+    return result
+
 def collect_df_server(reg_folder):
 
+
+    groups = {
+        "acoustics": [],
+        "predictions": [],
+        "peaks": [],
+        "merged": []
+    }
 
     for subfolder in os.listdir(reg_folder):
         subfolder_path = os.path.join(reg_folder,subfolder)
 
+        if not os.path.isdir(subfolder_path): continue
+
+        csvs = [os.path.join(subfolder_path,file) for file in os.listdor(subfolder_path) if file.endswith('.csv')]
+
         if 'acoustic_queries' in subfolder:
-            dfs_acoustics = [os.path.join(subfolder_path,f) for f in os.listdir(subfolder_path) if f.endswith('.csv')]
+            groups['acoustics'] = csvs
         if 'prediction_queries' in subfolder:
-            dfs_predictions = [os.path.join(subfolder_path,f) for f in os.listdir(subfolder_path) if f.endswith('.csv')]
+            groups['predictions'] = csvs
         if 'peaks_query' in subfolder:
-            dfs_peaks = [os.path.join(subfolder_path,f) for f in os.listdir(subfolder_path) if f.endswith('.csv')]
+            groups['peaks'] = csvs
         if 'merged_csv_query' in subfolder:
-            dfs_merged = [os.path.join(subfolder_path,f) for f in os.listdir(subfolder_path) if f.endswith('.csv')]
+            groups['merged'] = csvs
     
 
-    return sorted(dfs_acoustics),sorted(dfs_predictions),sorted(dfs_peaks),sorted(dfs_merged)
+    acoustics = map_files_by_date(groups['acoustics'])
+    predictions = map_files_by_date(groups['predictions'])
+    peaks = map_files_by_date(groups['peaks'])
+    merged = map_files_by_date(groups['merged'])
+
+    common_dates = sorted(set(acoustics)&set(predictions)&set(peaks)&set(merged))
+    return [(date,acoustics[date],predictions[date],peaks[date],merged[date]) for date in common_dates]
 
 def parse_probability(x):
     import ast
@@ -160,8 +192,53 @@ def add_night_column(hour_column, day_col):
     return night
 
 
+def trim_dataframe(df, start_seconds, end_seconds, logger, name):
+
+    if df is None or df.empty:
+        logger.warning("%s dataframe is empty before trimming", name)
+        return df
+    
+    start = df.index.min()
+    end = df.index.max()
+    duration = (end - start).total_seconds()
+
+    required_duration = start_seconds + end_seconds
+
+    if duration <= required_duration:
+        logger.warning("%s duration is %.1f seconds; cannot trim %d + %d seconds. Skipping trimming",name,duration,start_seconds,end_seconds)
+        return df
+    
+    return df.loc[start + pd.Timedelta(seconds=start_seconds) : end - pd.Timedelta(seconds=end_seconds)].copy()
+    
+def resolve_acoustic_level_column(df):
+
+    candidates = ("LA_corrected","LA","LAeq","LAFeq")
+    
+    for column in candidates:
+        if column in df.columns:
+            return column
+
+    raise KeyError(f"No acoustic level column found. Available columns: {df.columns.tolist()}")
+
 def add_datetime_columns(df,logging, date_col):
-    df['Timestamp'] = pd.to_datetime(df['Timestamp'], errors='coerce')
+
+    df = df.copy()
+
+    if date_col not in df.columns: raise KeyError(f"Missing datetime column {date_col!r} Available columns: {df.columns.tolist()}")
+
+    df['Timestamp'] = pd.to_datetime(df[date_col], errors='coerce',utc=True)
+    
+    invalid_count = int(df['Timestamp'].isna().sum())
+
+    if invalid_count:
+        logging.warning("Dropping %d rows with invalid timestamps",invalid_count)
+        df = df.dropna(subset=["Timestamp"]).copy()
+    
+    if df.empty: 
+        logging.warning("DataFrame is empty after timestamp conversion")
+        return df
+    
+    if not is_datetime64_any_dtype(df['Timestamp']): raise TypeError("Timestamp could not be converted to datetime")
 
     #df['day_hour'] = df.apply(lambda x: str(x[date_col].day) + '-' + str(x[date_col].hour),axis=1)
     weekday_translation = {
@@ -173,27 +250,25 @@ def add_datetime_columns(df,logging, date_col):
         "Saturday": " Sábado",
         "Sunday": " Domingo"
     }
-    if df['Timestamp'].dtype == 'datetime64[ns]' or df['Timestamp'].dtype == 'datetime64[ns, UTC+02:00]':
-        df["year"] = df['Timestamp'].dt.year
-        df["month"] = df['Timestamp'].dt.month
-        df['date'] = df['Timestamp'].dt.date
-        df['day'] = df['Timestamp'].dt.day
-        df['hour'] = df['Timestamp'].dt.hour
-        df['weekday'] = df['Timestamp'].dt.weekday
-        df['day_name'] = df['Timestamp'].dt.day_name()
+    
+    df["year"] = df['Timestamp'].dt.year
+    df["month"] = df['Timestamp'].dt.month
+    df['date'] = df['Timestamp'].dt.date
+    df['day'] = df['Timestamp'].dt.day
+    df['hour'] = df['Timestamp'].dt.hour
+    df['weekday'] = df['Timestamp'].dt.weekday
+    df['day_name'] = df['Timestamp'].dt.day_name()
 
-        df['day_name'] = df['day_name'].map(weekday_translation) 
+    df['day_name'] = (df['Timestamp'].dt.day_name().map(weekday_translation))
 
-        # df["weekday"] = df["weekday"].replace(WEEKDAY_TRANSLATION)
-        # df["weekday"] = df["weekday"].astype(str)
-        # df["day"] = df["day"].astype(str).str.zfill(2)
-        # df["fullday"] = df["day"] + df["weekday"]
+    # df["weekday"] = df["weekday"].replace(WEEKDAY_TRANSLATION)
+    # df["weekday"] = df["weekday"].astype(str)
+    # df["day"] = df["day"].astype(str).str.zfill(2)
+    # df["fullday"] = df["day"] + df["weekday"]
 
-        # print(df)
-        # exit()
+    # print(df)
+    # exit()
 
-    else:
-        logging.error(f"Failed to convert {date_col} to datetime in some rows.")
     #df['min_sec_str'] = df.apply(lambda x: datetime.datetime.strftime(x[date_col],'%M:%S'),axis=1)
     #df['min_sec_15_str'] = df.apply(lambda x: str(x[date_col].minute % 15) + '-'+str(x[date_col].second),axis=1)
     return df
