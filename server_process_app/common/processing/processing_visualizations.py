@@ -234,6 +234,10 @@ def process_all_folders(input_folder, device_folders, PERIODO_AGREGACION, PERCEN
             logger.info(f"Resultados dir: {resultados_dir}")
             logger.info(f"Content of resultados dir: {os.listdir(resultados_dir)}")
             dfs_acoustics,dfs_predictions,dfs_peaks,dfs_merged = collect_df_server(resultados_dir)
+            logger.info(f"dfs_acoustics: {dfs_acoustics}")
+            logger.info(f"dfs_predictions: {dfs_predictions}")
+            logger.info(f"dfs_peaks: {dfs_peaks}")
+            logger.info(f"dfs_merged: {dfs_merged}")
             # taking just 1 day, which are the first 86400 rows
             # df = df.iloc[:86400] # 1 day of data, 24 hours * 60 minutes * 60 seconds = 86400 seconds
             # df = df.iloc[:43200] # 1/2 day of data
