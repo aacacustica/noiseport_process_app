@@ -220,29 +220,29 @@ def get_device_config(device_id: str) -> dict:
             return d
     raise KeyError(f"Device not configured: {device_id}")
 
-def get_hourly_folders_device(devices,predictions_query_folder_name,peaks_query_folder_name,acoustics_query_folder_name):
+def get_hourly_folders_device(device_folder_path,predictions_query_folder_name,peaks_query_folder_name,acoustics_query_folder_name):
 
     hour_path_acoustics = []
     hour_path_predictions = []
     hour_path_peaks = []
     
-    for device in devices:
+
                     
-        predictions_params_query = os.path.join(device,predictions_query_folder_name)
-        peaks_params_query = os.path.join(device,peaks_query_folder_name)
-        acoustic_params_query = os.path.join(device,acoustics_query_folder_name)
+    predictions_params_query = os.path.join(device_folder_path,predictions_query_folder_name)
+    peaks_params_query = os.path.join(device_folder_path,peaks_query_folder_name)
+    acoustic_params_query = os.path.join(device_folder_path,acoustics_query_folder_name)
 
-        if not os.path.exists(peaks_params_query): os.makedirs(peaks_params_query)
+    if not os.path.exists(peaks_params_query): os.makedirs(peaks_params_query)
 
-        for file in os.listdir(acoustic_params_query):
-            if file.endswith('.csv') and 'fixed' in file:
-                hour_path_acoustics.append(os.path.join(acoustic_params_query,file))        
-        for file in os.listdir(predictions_params_query):
-            if file.endswith('.csv'):
-                hour_path_predictions.append(os.path.join(predictions_params_query,file))
-        for file in os.listdir(peaks_params_query):
-            if file.endswith('.csv') and 'fixed' in file:
-                hour_path_peaks.append(os.path.join(peaks_params_query,file))
+    for file in os.listdir(acoustic_params_query):
+        if file.endswith('.csv') and 'fixed' in file:
+            hour_path_acoustics.append(os.path.join(acoustic_params_query,file))        
+    for file in os.listdir(predictions_params_query):
+        if file.endswith('.csv'):
+            hour_path_predictions.append(os.path.join(predictions_params_query,file))
+    for file in os.listdir(peaks_params_query):
+        if file.endswith('.csv') and 'fixed' in file:
+            hour_path_peaks.append(os.path.join(peaks_params_query,file))
     
     return hour_path_acoustics,hour_path_predictions,hour_path_peaks
 
