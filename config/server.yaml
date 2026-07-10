@@ -20,7 +20,7 @@ processing:
   acoustic_queries_folder: acoustic_queries
   prediction_queries_folder: prediction_queries
   peaks_folder: peaks_query
-  merged_folder: merged_csv_files
+  merged_folder: merged_csv_query
 
   fixed_prefix: fixed_
   expected_wavs_per_hour: 60

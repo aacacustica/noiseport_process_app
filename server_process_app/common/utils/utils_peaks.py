@@ -72,7 +72,7 @@ def extract_key_from_filename(path: str):
     
     return None
 
-def merge_acoustics_predictions_and_peaks(acoustics_paths,predictions_paths,peaks_paths,logger):
+def merge_acoustics_predictions_and_peaks(acoustics_paths,predictions_paths,peaks_paths,output_folder_name,logger):
       
     """
     Refactor de la función para emparejar archivos por clave horaria (YYYYMMDD_HH),

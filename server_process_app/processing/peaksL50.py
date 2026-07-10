@@ -26,11 +26,11 @@ def main():
     # +----------------------------------------------------------------------+ #
     devices                         = config['devices']
     inbox_folder                    = config['paths']['inbox']
-
-
+    
     acoustics_folder_name           = config['processing']['acoustic_folder']
     predictions_folder_name         = config['processing']['prediction_folder']
     peaks_folder_name               = config['processing']['peaks_folder']
+    merged_folder_tag               = config['processing']['merged_folder']
 
     window_size                     = config['peaks']['window_size']
     adding_threshold                = config['peaks']['adding_threshold']
@@ -132,7 +132,7 @@ def main():
         hourly_acoustics_folders,hourly_predictions_folders,hourly_peaks_folders = list(get_hourly_folders_device(device,predictions_folder_name,peaks_folder_name,acoustics_folder_name))
 
         # ------------------------- Merge peak,acoustic and prediction csvs----------------------------------------------------------- #
-        merge_acoustics_predictions_and_peaks(hourly_acoustics_folders,hourly_predictions_folders,hourly_peaks_folders,logger)
+        merge_acoustics_predictions_and_peaks(hourly_acoustics_folders,hourly_predictions_folders,hourly_peaks_folders,merged_folder_tag,logger)
     
     except Exception as e:
         logger.error(f"Error concatenating acoustics predictions and peaks: {e}")
