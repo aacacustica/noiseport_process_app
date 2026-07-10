@@ -129,6 +129,9 @@ def main():
 
     try:
         # ------------------------- List peak, acoustic and prediction files---------------------------------------------------------- #
+        logger.info(f"{predictions_folder_name}")
+        logger.info(f"{acoustics_folder_name}")
+        logger.info(f"{peaks_folder_name}")
         hourly_acoustics_folders,hourly_predictions_folders,hourly_peaks_folders = list(get_hourly_folders_device(device,predictions_folder_name,peaks_folder_name,acoustics_folder_name))
 
         # ------------------------- Merge peak,acoustic and prediction csvs----------------------------------------------------------- #
