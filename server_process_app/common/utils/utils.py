@@ -299,7 +299,7 @@ def get_desired_query_folder(days_folder,desired_folder):
 def collect_folders_days_devices(folders,devices):
 
     result = {
-        Path(device).name: {
+        device: {
             "files": [],
             "processed": False,
         }
@@ -311,7 +311,7 @@ def collect_folders_days_devices(folders,devices):
         if device_name not in result:
             continue
             
-        result[device_name].extend(
+        result.setdefault(device_name,[]).extend(
             str(file)
             for file in folder.iterdir()
             if file.is_file() and file.suffix.lower() == '.csv'

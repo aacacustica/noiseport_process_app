@@ -57,10 +57,10 @@ def main():
     merged_folder_name  = config['processing']['merged_folder']
 
 
-    devices_ids             = [device['id'] for device in devices if device['enabled'] == True]
-    devices_folder_paths    = [os.path.join(inbox_folder,device['id']) for device in devices if device['enabled'] == True]
-    enabled_devices         = [device['id'] for device in devices if device['enabled'] == True]
-    taxonomy                = mode
+    devices_ids                         = [device['id'] for device in devices if device['enabled'] == True]
+    enabled_devices_folder_paths        = [os.path.join(inbox_folder,device['id']) for device in devices if device['enabled'] == True]
+    enabled_devices_names               = [device['id'] for device in devices if device['enabled'] == True]
+    taxonomy                            = mode
 
     try:
         
@@ -69,7 +69,7 @@ def main():
         devices                                 = load_devices()
         oca_limits                              = resolve_oca_type(limit_oca)
         folders                                 = collect_folders_server(devices,merged_folder_name)
-        days_devices                            = collect_folders_days_devices(folders,enabled_devices)
+        days_devices                            = collect_folders_days_devices(folders,enabled_devices_names)
 
         
         process_all_folders(
