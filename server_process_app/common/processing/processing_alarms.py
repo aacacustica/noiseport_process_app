@@ -137,7 +137,7 @@ def process_single_csv( csv_path,device,folder,yamnet_df,yamnet_csv,oca_limits,l
             logger.exception(f"DF from {csv_path} is none")
             return
 
-    except Exception as e: logger.Exception(f"Exception while adding indicators, night, or oca column: {e}")
+    except Exception as e: logger.exception(f"Exception while adding indicators, night, or oca column: {e}")
     
 
     # ------------------------- Procesar predicciones -------------------------------------------------- #
@@ -152,7 +152,7 @@ def process_single_csv( csv_path,device,folder,yamnet_df,yamnet_csv,oca_limits,l
         else:
             logger.Warning(f"Prediction_1 or Prob_1 columns not found in df from: {csv_path}")
 
-    except Exception as e: logger.Exception(f" Exception while processing predictions file:{e}")
+    except Exception as e: logger.exception(f" Exception while processing predictions file:{e}")
 
     # ------------------------- Transformar a datos de una hora ----------------------------------------- #
 
@@ -168,47 +168,47 @@ def process_single_csv( csv_path,device,folder,yamnet_df,yamnet_csv,oca_limits,l
         df_1h["oca"] = df_1h["hour"].apply(lambda h: db_limit(h, **oca_limits))
 
     except Exception as e:
-        logger.Exception(f"Exception transforming one second data: {e} in file : {csv_path}")
+        logger.exception(f"Exception transforming one second data: {e} in file : {csv_path}")
 
     # ------------------------- Creación de alarmas ---------------------------------------------------- #
 
     try: df_alarms_1h = oca_alarm(df_alarms_1h, logger=logger)
-    except Exception as e: logger.Exception(f"Exception while creating OCA alarm: {e} in file : {csv_path}")
+    except Exception as e: logger.exception(f"Exception while creating OCA alarm: {e} in file : {csv_path}")
 
     try: df_alarms_1h = lmax_alarm(df_alarms_1h, logger=logger, threshold=95)
-    except Exception as e: logger.Exception(f"Exception while creating Lmax alarm: {e} in file: {csv_path}")
+    except Exception as e: logger.exception(f"Exception while creating Lmax alarm: {e} in file: {csv_path}")
 
     try: df_alarms_1h = LC_LA_alarm(df_alarms_1h, logger=logger,threshold_norma=10, threshold_dB=3)
-    except Exception as e: logger.Exception(f"Exception while creating LC_LA alarm: {e} in file: {csv_path}")
+    except Exception as e: logger.exception(f"Exception while creating LC_LA alarm: {e} in file: {csv_path}")
 
     try: df_alarms_1h = l90_alarm_dynamic(df_alarms_1h, logger=logger, threshold_dB=5)
-    except Exception as e: logger.Exception(f"Exception while creating LC_LA alarm: {e} in file: {csv_path}")
+    except Exception as e: logger.exception(f"Exception while creating LC_LA alarm: {e} in file: {csv_path}")
 
     try: df_alarms_1h = frequency_composition(df_1h,df_alarms_1h,logger=logger,threshold_comp=5)
-    except Exception as e: logger.Exception(f"Exception while creating Freq_composition alarm: {e} in file: {csv_path}")
+    except Exception as e: logger.exception(f"Exception while creating Freq_composition alarm: {e} in file: {csv_path}")
 
     try: df_alarms_1h = tonal_frequency(df_1h,df_alarms_1h,folder_output_dir_1h,logger,plotname=folder)
-    except Exception as e: logger.Exception(f"Exception while creating Tonal_frequency alarm: {e} in file: {csv_path}")
+    except Exception as e: logger.exception(f"Exception while creating Tonal_frequency alarm: {e} in file: {csv_path}")
 
     # ------------------------- Creación de gráficos ---------------------------------------------------- #
 
     try: plot_peak_distribution_heatmap(df_alarms_1h, output_path_graphics_alarms, logger, plotname="heatmap")
-    except Exception as e: logger.Exception(f"Exception while plotting peak distribution heatmap: {e} in file {csv_path}")
+    except Exception as e: logger.exception(f"Exception while plotting peak distribution heatmap: {e} in file {csv_path}")
 
     try: plot_peak_distribution(df_alarms_1h, output_path_graphics_alarms, logger, plotname="peak")
-    except Exception as e: logger.Exception(f"Exception while plotting peak distribution: {e} in file {csv_path}")
+    except Exception as e: logger.exception(f"Exception while plotting peak distribution: {e} in file {csv_path}")
 
     try: plot_density_distribution_peaks(df_alarms_1h, output_path_graphics_alarms, logger, plotname="density")
-    except Exception as e: logger.Exception(f"Exception while plotting density distribution peaks: {e} in file {csv_path}")
+    except Exception as e: logger.exception(f"Exception while plotting density distribution peaks: {e} in file {csv_path}")
 
     try: plot_predic_peak_laeq_mean(df_alarms_1h,yamnet_csv, output_path_ai_alarms, logger, plotname="predic")
-    except Exception as e: logger.Exception(f"Exception while plotting prediction peak laeq mean: {e} in file {csv_path}")
+    except Exception as e: logger.exception(f"Exception while plotting prediction peak laeq mean: {e} in file {csv_path}")
 
     try: plot_box_plot_prediction(df_alarms_1h,yamnet_csv, output_path_ai_alarms, logger, plotname="box")
-    except Exception as e: logger.Exception(f"Exception while plotting box plot prediction: {e} in file {csv_path}")
+    except Exception as e: logger.exception(f"Exception while plotting box plot prediction: {e} in file {csv_path}")
 
     try: plot_heat_map_prediction(df_alarms_1h,yamnet_csv, output_path_ai_alarms, logger, plotname="heat map predic")
-    except Exception as e: logger.Exception(f"Exception while plotting heat map prediction: {e} in file {csv_path}")
+    except Exception as e: logger.exception(f"Exception while plotting heat map prediction: {e} in file {csv_path}")
 
     # ------------------------- Guardado de CSV ----------------------------------------------------------- #
 
