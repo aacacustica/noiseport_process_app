@@ -78,7 +78,7 @@ def main():
 
         point_to_process = filter_point
 
-        with open(COEFFS_PATH,'r') as f:
+        with open(coeffs_path,'r') as f:
             coeffs = json.load(f)
 
         for device_folder_path in devices_folder_paths:
