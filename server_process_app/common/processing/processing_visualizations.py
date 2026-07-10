@@ -142,7 +142,7 @@ def process_all_folders(input_folder, device_folders, PERIODO_AGREGACION, PERCEN
         #####################################
         try:
             reg_folder = os.path.join(input_folder, folder) # \\192.168.205.117\AAC_Server\INDUSTRIA\23132-IRUÑA_OCA_CANTERA\5-Resultados\FAA205-P1_CAMPAÑA1\SPL
-            folder = folder.split("/")[:-1]
+            folder = folder.split("/")[-1]
             logger.info(f"Entering folder: {folder}")
             actual_folder_name = folder[-1]
             #folder = folder.split("\\")[:-1]
