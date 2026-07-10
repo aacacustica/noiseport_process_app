@@ -531,51 +531,34 @@ def process_all_folders(input_folder, device_folders, PERIODO_AGREGACION, PERCEN
                     logger.info("")
                     logger.info("FILTERING THE PREDICTION DF. TAKING JUST THE FIRST ONE AND IF IT OVERCOME THE THRESHOLD")
 
-                    # getting just the first class and their oribability
-                    df_prediction_alarms = df_prediction
-
-
-                    df_prediction_alarms["class_list"] = df_prediction_alarms["Prediction_1"].apply(parse_prediction_class)
-                    df_prediction_alarms["probability_list"] = df_prediction_alarms["Prob_1"].apply(parse_probability)
-
-                    df_prediction_alarms["class"] = df_prediction_alarms["class_list"].apply(lambda x: x[0] if len(x) > 0 else "Silence")
-                    df_prediction_alarms["probability"] = df_prediction_alarms["probability_list"].apply(lambda x: float(x[0]) if len(x) > 0 and pd.notna(x[0]) else 0.0)
-                    """
-                        df_prediction_alarms["class_list"] = df_prediction_alarms["Prediction_1"].apply(parse_prediction_class)
-                        df_prediction_alarms["probability_list"] = df_prediction_alarms["Prob_1"].apply(parse_probability)
-
-                        df_prediction_alarms["class"] = df_prediction_alarms["class_list"].apply(lambda x: x[0] if len(x) > 0 else "Silence")
-                        df_prediction_alarms["probability"] = df_prediction_alarms["probability_list"].apply(lambda x: float(x[0]) if len(x) > 0 and pd.notna(x[0]) else 0.0)
-                    """
-
-                    #now, just taking the first class when its probability is greater than the threshold
-                    df_prediction_alarms = df_prediction_alarms[df_prediction_alarms['probability'] >= PROBABILITY_THRESHOLD]
-
-
-                    #adding the prediction to the df
-                    yamnet_csv_renamed = yamnet_csv.rename(columns={"display_name": "class"})
-                    df_prediction_alarms_mapped = df_prediction_alarms.merge(
-                        yamnet_csv_renamed,
-                        on="class",
-                        how="left"
-                    )
-
-
-                    if df is not None: df['Timestamp'] = pd.to_datetime(df['Timestamp'])
-                    else: continue
-                    df_prediction_alarms_mapped['Timestamp'] = pd.to_datetime(df_prediction_alarms_mapped['Timestamp'])
-                    if df is not None:
-
-                        df_for_merge = df.reset_index()
-                        prediction_for_merge = df_prediction_alarms_mapped.reset_index()
-                        df_for_merge['Timestamp'] = pd.to_datetime(df_for_merge['Timestamp'],utc=True)
-                        prediction_for_merge['Timestamp'] = pd.to_datetime(prediction_for_merge['Timestamp'],utc=True)
-                        df = df_for_merge.merge(prediction_for_merge[["Timestamp","class","probability","NoisePort_Level_1"]],on="Timestamp",how="left")
-                        df = df.set_index("Timestamp",drop=True)
-
+                    if df is None or df.empty:
+                        logger.warning("Acoustic dataframe is empty")
+                        continue
                     
-                    df.rename(columns={'Timestamp_x': 'Timestamp'}, inplace=True, errors='ignore')
-                    logger.info("Added the prediction data to the main dataframe")
+                    if df_prediction is None or df.empty:
+                        logger.warning("Prediction dataframe is empty")
+
+                    df_prediction_alarms = df_prediction.reset_index().copy()
+                    df_prediction_alarms['class_list'] = (df_prediction_alarms['Prediction_1'].apply(parse_prediction_class))
+                    df_prediction_alarms['probability_list'] = (df_prediction_alarms["Prob_1"].apply(parse_probability))
+                    df_prediction_alarms['class'] = (df_prediction_alarms['class_list'].apply(lambda values: values[0] if values else "Silence"))
+                    df_prediction_alarms['probability'] = (df_prediction_alarms['probability_list'].apply(lambda values: (float(values[0]) if values and pf.notna(values[0]) else 0.0)))
+                    df_prediction_alarms = df_prediction_alarms[df_prediction_alarms['probability'] >= PROBABILITY_THRESHOLD].copy()
+                    
+                    yamnet_csv_renamed = yamnet_csv.rename(columns='display_name':"class")
+
+                    df_prediction_alarms_mapped = (df_prediction_alarms.merge(yamnet_csv_renamed,on='class',how='left'))
+
+                    df_for_merge = df.reset_index()
+
+                    df_for_merge['Timestamp'] = pd.to_datetime(df_for_merge['Timestamp'],errors='coerce',utc=True)
+                    df_predictions_alarms_mapped['Timestamp'] = pd.to_datetime(df_predictions_alarms_mapped['Timestamp'],errors='coerce',utc=True)
+
+                    prediction_columns = ["Timestamp","class","probability","NoisePort_Level_1"]
+
+                    df = df_for_merge.merge(df_prediction_alarms_mapped[prediction_columns],on="Timestamp",how="left")
+
+                    df = df.set_index("Timestamp",drop=True)
 
                 except Exception as e:
                     logger.error(f"An error occurred while processing folder {folder}: {e}")
@@ -612,7 +595,7 @@ def process_all_folders(input_folder, device_folders, PERIODO_AGREGACION, PERCEN
                     # rolling median for the LA values with a window of 30 seconds
                     level_column = resolve_acoustic_level_column(df_peaks)
                     df_peaks[level_column] = pd.to_numeric(df_peaks[level_column],errors='coerce')
-                    df_peaks = df_peaks.dropna(subset=['level_column']).copy()
+                    df_peaks = df_peaks.dropna(subset=[level_column]).copy()
                     df_peaks['LA_cor_median'] = df_peaks[level_column].rolling(window=WINDOW_SIZE, min_periods=1).median() + ADDING_THRESHOLD
                     df_peaks['Peak'] = 1
 
@@ -626,10 +609,10 @@ def process_all_folders(input_folder, device_folders, PERIODO_AGREGACION, PERCEN
                     logger.info(f"Saved peaks filtered dataframe to {df_peaks_csv_path}, with a lenght of {len(df_peaks)}")
 
                     #Timestamp to datetime
-                    timestamp_source = ("Timestamp" if "Timestamp" in df_peak.columns else "start_time")
+                    timestamp_source = ("Timestamp" if "Timestamp" in df_peaks.columns else "start_time")
 
                     df_peaks['Timestamp'] = pd.to_datetime(df_peaks[timestamp_source],errors="coerce",utc=True)
-                    df_peaks = df_peaks.dropna(subset="Timestamp").copy()
+                    df_peaks = df_peaks.dropna(subset=["Timestamp"]).copy()
                     df_peaks = df_peaks.set_index("Timestamp",drop=True)
                     df_peaks['Peak'] = 1
 
