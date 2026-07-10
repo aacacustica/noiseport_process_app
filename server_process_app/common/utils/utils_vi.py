@@ -44,7 +44,7 @@ def collect_df_server(reg_folder):
 
         if not os.path.isdir(subfolder_path): continue
 
-        csvs = [os.path.join(subfolder_path,file) for file in os.listdor(subfolder_path) if file.endswith('.csv')]
+        csvs = [os.path.join(subfolder_path,file) for file in os.listdir(subfolder_path) if file.endswith('.csv')]
 
         if 'acoustic_queries' in subfolder:
             groups['acoustics'] = csvs
@@ -213,7 +213,7 @@ def trim_dataframe(df, start_seconds, end_seconds, logger, name):
 def resolve_acoustic_level_column(df):
 
     candidates = ("LA_corrected","LA","LAeq","LAFeq")
-    
+
     for column in candidates:
         if column in df.columns:
             return column
