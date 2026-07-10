@@ -535,11 +535,11 @@ def process_all_folders(input_folder, device_folders, PERIODO_AGREGACION, PERCEN
                     df_prediction_alarms = df_prediction
 
 
-                        df_prediction_alarms["class_list"] = df_prediction_alarms["Prediction_1"].apply(parse_prediction_class)
-                        df_prediction_alarms["probability_list"] = df_prediction_alarms["Prob_1"].apply(parse_probability)
+                    df_prediction_alarms["class_list"] = df_prediction_alarms["Prediction_1"].apply(parse_prediction_class)
+                    df_prediction_alarms["probability_list"] = df_prediction_alarms["Prob_1"].apply(parse_probability)
 
-                        df_prediction_alarms["class"] = df_prediction_alarms["class_list"].apply(lambda x: x[0] if len(x) > 0 else "Silence")
-                        df_prediction_alarms["probability"] = df_prediction_alarms["probability_list"].apply(lambda x: float(x[0]) if len(x) > 0 and pd.notna(x[0]) else 0.0)
+                    df_prediction_alarms["class"] = df_prediction_alarms["class_list"].apply(lambda x: x[0] if len(x) > 0 else "Silence")
+                    df_prediction_alarms["probability"] = df_prediction_alarms["probability_list"].apply(lambda x: float(x[0]) if len(x) > 0 and pd.notna(x[0]) else 0.0)
                     """
                         df_prediction_alarms["class_list"] = df_prediction_alarms["Prediction_1"].apply(parse_prediction_class)
                         df_prediction_alarms["probability_list"] = df_prediction_alarms["Prob_1"].apply(parse_probability)
