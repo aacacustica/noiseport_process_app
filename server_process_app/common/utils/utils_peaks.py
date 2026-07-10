@@ -81,7 +81,9 @@ def merge_acoustics_predictions_and_peaks(acoustics_paths,predictions_paths,peak
 
     Devuelve la lista de archivos generados (paths).
     """
-    
+    logger.info(f"Acoustics paths : {acoustics_paths}")
+    logger.info(f"Predictions paths : {predictions_paths}")
+    logger.info(f"Peaks paths : {peaks_paths}")    
 
     # Filtrado inicial (el tag de fixed se propaga en toda la cadena y llega hasta peaks también)
     peaks_paths = [f for f in peaks_paths if 'fixed' in f]
