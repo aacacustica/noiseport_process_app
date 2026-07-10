@@ -773,7 +773,7 @@ def collect_folders(input_folder,coeffs_path, change_time_flag,label_source_type
     with open(coeffs_path,'r') as f:
         coeffs = json.load(f)
 
-    if "raspberry" in label_source_type:
+    if "raspberry" or 'ccmp' in label_source_type:
         logger.info("Searching for RASPBERRY")
         for root, dirs, _ in os.walk(input_folder):
             if point_filter is not None:
