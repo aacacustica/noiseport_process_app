@@ -132,8 +132,10 @@ def merge_acoustics_predictions_and_peaks(acoustics_paths,predictions_paths,peak
     
     # Iterar sobre las horas donde existan acoustics Y predictions
     all_keys = sorted(set(ac_dict.keys()) & set(pr_dict.keys()))
-    logger.info(f"Processing {len(all_keys)} hours (acoustic+prediction pairs). "
-                f"{len(pk_dict)} keys with peaks available.")
+    logger.info(f"Processing {len(all_keys)} hours (acoustic+prediction pairs). \n "
+                f"{len(pk_dict)} keys with peaks available. \n"
+                f"{len(ac_dict)} keys with acoustics available. \n"
+                f"{len(pr_dict)} keys with predictions available.")
 
     generated_files = []
 
