@@ -129,7 +129,7 @@ def process_all_folders(input_folder, device_folders, PERIODO_AGREGACION, PERCEN
 
     stable_version = get_stable_version(logger)
     home_dir = os.path.expanduser('~')
-    temporal_bool = True
+    temporal_bool = False
 
 
     for folder in tqdm(device_folders, desc="Processing folders"): # \\192.168.205.117\AAC_Server\OCIO\24052_ZARAUTZ\CAMPAÑA_1\3-Medidas\ZARAUTZ_C1_P1\AUDIOMOTH
@@ -231,13 +231,9 @@ def process_all_folders(input_folder, device_folders, PERIODO_AGREGACION, PERCEN
                     logger.warning(f"df is None")
                     continue
             """
-            logger.info(f"Resultados dir: {resultados_dir}")
-            logger.info(f"Content of resultados dir: {os.listdir(resultados_dir)}")
+
             dfs_acoustics,dfs_predictions,dfs_peaks,dfs_merged = collect_df_server(resultados_dir)
-            logger.info(f"dfs_acoustics: {dfs_acoustics}")
-            logger.info(f"dfs_predictions: {dfs_predictions}")
-            logger.info(f"dfs_peaks: {dfs_peaks}")
-            logger.info(f"dfs_merged: {dfs_merged}")
+
             # taking just 1 day, which are the first 86400 rows
             # df = df.iloc[:86400] # 1 day of data, 24 hours * 60 minutes * 60 seconds = 86400 seconds
             # df = df.iloc[:43200] # 1/2 day of data
