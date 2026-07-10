@@ -38,7 +38,7 @@ def main():
     prominence                      = config['peaks']['prominence']
 
     devices_folder_paths = [os.path.join(inbox_folder,device['id']) for device in devices if device['enabled'] == True]
-    
+    logger.info(f"Devices folder paths: {devices_folder_paths}")
     for device in tqdm(devices_folder_paths, desc='Processing csv files'):
 
         # +------------------------------------------------------------+ #
