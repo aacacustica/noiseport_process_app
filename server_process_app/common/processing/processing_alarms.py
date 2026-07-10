@@ -41,7 +41,7 @@ def process_single_csv( csv_path,device,folder,yamnet_df,yamnet_csv,oca_limits,l
     output_path_graphics_alarms     = os.path.join(post_dir,day_hour,'GRAPHICS_ALARMS')
     output_path_ai_alarms           = os.path.join(post_dir,day_hour,'AI_Alarms')
     output_path_day                 = os.path.join(post_dir,day_hour)
-    folder_output_dir_for_alarms    = folder.replace('SPL', 'Graphics_ALARMS')
+    folder_output_dir_for_alarms    = Path(str(folder).replace("SPL", "Graphics_ALARMS"))
     folder_output_dir_1h            = os.path.dirname(folder_output_dir_for_alarms)
     ia_visualization_folder         = os.path.join(folder_output_dir_1h, 'AI_ALARMS')
     alarms_csv_path                 = os.path.join(output_path_day, f"{device}_alarms.csv")
