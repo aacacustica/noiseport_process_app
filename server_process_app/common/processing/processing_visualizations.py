@@ -461,7 +461,7 @@ def process_all_folders(input_folder, device_folders, PERIODO_AGREGACION, PERCEN
 
 
                     logger.info(f"Ship dock 1h")
-                    ship_dock_1h_path = os.path.join(home_dir, RELATIVE_PATH_SHIPS_1H)
+                    ship_dock_1h_path = RELATIVE_PATH_SHIPS_1H
                     #check if the file exists
                     if not os.path.exists(ship_dock_1h_path):
                         logger.error(f"File {ship_dock_1h_path} does not exist. Please check the path.")
