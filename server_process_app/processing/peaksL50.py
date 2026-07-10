@@ -31,6 +31,8 @@ def main():
     predictions_folder_name         = config['processing']['prediction_folder']
     peaks_folder_name               = config['processing']['peaks_folder']
     merged_folder_tag               = config['processing']['merged_folder']
+    acoustics_query_folder_tag      = config['processing']['acoustic_queries_folder']
+    prediction_query_folder_tag     = config['processing']['prediction_queries_folder']
 
     window_size                     = config['peaks']['window_size']
     adding_threshold                = config['peaks']['adding_threshold']
@@ -59,7 +61,7 @@ def main():
         
         
         # ------------------------- Get hourly queries files paths in a list ------------------------ #
-        hourly_acoustics_folders,_,_ = list(get_hourly_folders_device(device,predictions_folder_name,peaks_folder_name,acoustics_folder_name))
+        hourly_acoustics_folders,_,_ = list(get_hourly_folders_device(device,prediction_query_folder_tag,peaks_folder_name,acoustics_query_folder_tag))
         device_name = os.path.basename(device)
         
         
@@ -129,14 +131,9 @@ def main():
 
         try:
             # ------------------------- List peak, acoustic and prediction files---------------------------------------------------------- #
-            logger.info(f"{predictions_folder_name}")
-            logger.info(f"{acoustics_folder_name}")
-            logger.info(f"{peaks_folder_name}")
-            logger.info(f"{device}")
-            hourly_acoustics_folders,hourly_predictions_folders,hourly_peaks_folders = list(get_hourly_folders_device(device,predictions_folder_name,peaks_folder_name,acoustics_folder_name))
-            logger.info(f"{hourly_acoustics_folders}")
-            logger.info(f"{hourly_predictions_folders}")
-            logger.info(f"{hourly_peaks_folders}")
+
+            hourly_acoustics_folders,hourly_predictions_folders,hourly_peaks_folders = list(get_hourly_folders_device(device,prediction_query_folder_tag,peaks_folder_name,acoustics_query_folder_tag))
+
             # ------------------------- Merge peak,acoustic and prediction csvs----------------------------------------------------------- #
             merge_acoustics_predictions_and_peaks(hourly_acoustics_folders,hourly_predictions_folders,hourly_peaks_folders,merged_folder_tag,logger)
 
