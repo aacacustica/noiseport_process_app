@@ -143,7 +143,7 @@ def merge_acoustics_predictions_and_peaks(acoustics_paths,predictions_paths,peak
         pred_path = pr_dict[key]
         peak_files_for_key = pk_dict.get(key, [])  # lista (posiblemente vacía)
 
-        output_path = "/" + os.path.join(*acoustic_path.split('/')[:5],MERGED_QUERY)
+        output_path = "/" + os.path.join(*acoustic_path.split('/')[:5],output_folder_name)
         if not os.path.exists(output_path): os.makedirs(output_path)
         
         
