@@ -6,16 +6,18 @@ import subprocess
 import os
 import json
 
+from pathlib import Path
 from pandas.api.types import is_datetime64_any_dtype
 
 from server_process_app.common.config.config_vi import *
 from server_process_app.common.utils.utils import * 
 
 config = load_config()
+
 RELATIVE_PATH_YAMNET_MAP = config['models']['yamnet_class_map']
 
-RELATIVE_PATH_TAXONOMY_PORT = config['models']['urban_taxonomy_mapping']
-RELATIVE_PATH_TAXONOMY_URBAN = config['models']['port_taxonomy_mapping']
+RELATIVE_PATH_TAXONOMY_URBAN = config['models']['urban_taxonomy_mapping']
+RELATIVE_PATH_TAXONOMY_PORT = config['models']['port_taxonomy_mapping']
 
 def extract_file_date(path):
     match = re.search(r"(\d{8})",Path(path).stem)
@@ -213,7 +215,7 @@ def trim_dataframe(df, start_seconds, end_seconds, logger, name):
     
 def resolve_acoustic_level_column(df):
 
-    candidates = ("LA_corrected","LA","LAeq","LAFeq")
+    candidates = ("LA_corrected","LA","LAeq","LAFeq","leq")
 
     for column in candidates:
         if column in df.columns:

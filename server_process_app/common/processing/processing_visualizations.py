@@ -129,7 +129,7 @@ def process_all_folders(input_folder, device_folders, PERIODO_AGREGACION, PERCEN
 
     stable_version = get_stable_version(logger)
     home_dir = os.path.expanduser('~')
-    temporal_bool = False
+
 
 
     for folder in tqdm(device_folders, desc="Processing folders"): # \\192.168.205.117\AAC_Server\OCIO\24052_ZARAUTZ\CAMPAÑA_1\3-Medidas\ZARAUTZ_C1_P1\AUDIOMOTH
@@ -269,10 +269,7 @@ def process_all_folders(input_folder, device_folders, PERIODO_AGREGACION, PERCEN
                 csv_peaks_basename = os.path.basename(df_peaks_path)
                 csv_merged_basename = os.path.basename(df_all_path)
 
-                if temporal_bool:
-                    if csv_predictions_basename not in ["fixed_20260609.csv","fixed_20260610.csv","fixed_20260611.csv","fixed_202606012.csv"]: continue
-                    
-                    logger.info(f"Predictions with info")
+
 
                 logger.info(f"Processing visualizations using the following csvs: ")
 
@@ -295,9 +292,9 @@ def process_all_folders(input_folder, device_folders, PERIODO_AGREGACION, PERCEN
                         logger.info("")
                         # add datetime columns, sort by datetime and set datetime as index
                         logger.info(f"FOR SPL FILE: Adding datetime columns, sorting by datetime and setting datetime as index")
-                        df = add_datetime_columns(df,logger, date_col='datetime')
+                        df = add_datetime_columns(df,logger, date_col='Timestamp')
                         df = df.sort_values('Timestamp')
-                        df.set_index('Timestamp',drop=True)
+                        df = df.set_index('Timestamp',drop=True)
                         start_date = df.index[0]
                         end_date = df.index[-1]
 
@@ -315,7 +312,7 @@ def process_all_folders(input_folder, device_folders, PERIODO_AGREGACION, PERCEN
                         
                         df_prediction = add_datetime_columns( df_prediction,logger,date_col="Timestamp")
                         df_prediction = df_prediction.sort_values("Timestamp")
-                        df_prediction = df_prediction.set_index("Timestmap",drop=True)
+                        df_prediction = df_prediction.set_index("Timestamp",drop=True)
                         pred_start_date = df_prediction.index[0]
                         pred_end_date = df_prediction.index[-1]
 
@@ -326,6 +323,7 @@ def process_all_folders(input_folder, device_folders, PERIODO_AGREGACION, PERCEN
                 
                 except Exception as e:
                     logger.error(f"An error occurred while adding datetime columns: {e}")
+                    continue
 
 
                 try:
@@ -382,14 +380,14 @@ def process_all_folders(input_folder, device_folders, PERIODO_AGREGACION, PERCEN
                     # removing nan values
                     
                     if df_prediction is not None:
-                        if temporal_bool: 
+
                             
-                            df_prediction = df_prediction.dropna(axis=1,how='all')
-                            
-                            if 'Prediction_1' in df_prediction.columns: df_prediction['Prediction_1'] = df_prediction['Prediction_1'].fillna("\'Silence\'")
-                            if 'Prediction_2' in df_prediction.columns: df_prediction['Prediction_2'] = df_prediction['Prediction_2'].fillna("\'Silence\'")
-                            if 'Prediction_3' in df_prediction.columns: df_prediction['Prediction_3'] = df_prediction['Prediction_3'].fillna("\'Silence\'")
-                            
+                        df_prediction = df_prediction.dropna(axis=1,how='all')
+                        
+                        if 'Prediction_1' in df_prediction.columns: df_prediction['Prediction_1'] = df_prediction['Prediction_1'].fillna("\'Silence\'")
+                        if 'Prediction_2' in df_prediction.columns: df_prediction['Prediction_2'] = df_prediction['Prediction_2'].fillna("\'Silence\'")
+                        if 'Prediction_3' in df_prediction.columns: df_prediction['Prediction_3'] = df_prediction['Prediction_3'].fillna("\'Silence\'")
+                        
                         else: df_prediction = df_prediction.dropna()
                         logger.info(f"Removing nan values")
 
@@ -536,18 +534,19 @@ def process_all_folders(input_folder, device_folders, PERIODO_AGREGACION, PERCEN
                     # getting just the first class and their oribability
                     df_prediction_alarms = df_prediction
 
-                    if temporal_bool:
+
                         df_prediction_alarms["class_list"] = df_prediction_alarms["Prediction_1"].apply(parse_prediction_class)
                         df_prediction_alarms["probability_list"] = df_prediction_alarms["Prob_1"].apply(parse_probability)
 
                         df_prediction_alarms["class"] = df_prediction_alarms["class_list"].apply(lambda x: x[0] if len(x) > 0 else "Silence")
                         df_prediction_alarms["probability"] = df_prediction_alarms["probability_list"].apply(lambda x: float(x[0]) if len(x) > 0 and pd.notna(x[0]) else 0.0)
-                    else:
+                    """
                         df_prediction_alarms["class_list"] = df_prediction_alarms["Prediction_1"].apply(parse_prediction_class)
                         df_prediction_alarms["probability_list"] = df_prediction_alarms["Prob_1"].apply(parse_probability)
 
                         df_prediction_alarms["class"] = df_prediction_alarms["class_list"].apply(lambda x: x[0] if len(x) > 0 else "Silence")
                         df_prediction_alarms["probability"] = df_prediction_alarms["probability_list"].apply(lambda x: float(x[0]) if len(x) > 0 and pd.notna(x[0]) else 0.0)
+                    """
 
                     #now, just taking the first class when its probability is greater than the threshold
                     df_prediction_alarms = df_prediction_alarms[df_prediction_alarms['probability'] >= PROBABILITY_THRESHOLD]
@@ -607,28 +606,33 @@ def process_all_folders(input_folder, device_folders, PERIODO_AGREGACION, PERCEN
 
                     #peaks, properties=find_peaks(df['LA_corrected'], prominence=PROMINENCE, width=WIDTH)
                     #df_peaks = df.iloc[peaks].copy()
-                    if not temporal_bool:
-                        logger.info("")
-                        logger.info(f"Rolling the data with a window of {WINDOW_SIZE} seconds")
-                        # rolling median for the LA values with a window of 30 seconds
-                        level_column = resolve_acoustic_level_column(df_peaks)
-                        df_peaks['LA_cor_median'] = df_peaks[level_column].rolling(window=WINDOW_SIZE, min_periods=1).quantile(0.5) + ADDING_THRESHOLD
-                        df_peaks['Peak'] = 1
 
-                        #above threshold
-                        logger.info(f"Calculating peaks above threshold")
-                        df_peaks = df_peaks[df_peaks[level_column] > df_peaks['LA_cor_median']]
-                        logger.info(f"There are {len(df_peaks)} peaks in the dataframe after filtering")
-                        # 
+                    logger.info("")
+                    logger.info(f"Rolling the data with a window of {WINDOW_SIZE} seconds")
+                    # rolling median for the LA values with a window of 30 seconds
+                    level_column = resolve_acoustic_level_column(df_peaks)
+                    df_peaks[level_column] = pd.to_numeric(df_peaks[level_column],errors='coerce')
+                    df_peaks = df_peaks.dropna(subset=['level_column']).copy()
+                    df_peaks['LA_cor_median'] = df_peaks[level_column].rolling(window=WINDOW_SIZE, min_periods=1).median() + ADDING_THRESHOLD
+                    df_peaks['Peak'] = 1
 
-                        df_peaks.to_csv(df_peaks_csv_path, index=False)
-                        logger.info(f"Saved peaks filtered dataframe to {df_peaks_csv_path}, with a lenght of {len(df_peaks)}")
+                    #above threshold
+                    logger.info(f"Calculating peaks above threshold")
+                    df_peaks = df_peaks[df_peaks[level_column] > df_peaks['LA_cor_median']].copy()
+                    logger.info(f"There are {len(df_peaks)} peaks in the dataframe after filtering")
+                    # 
+
+                    df_peaks.to_csv(df_peaks_csv_path, index=False)
+                    logger.info(f"Saved peaks filtered dataframe to {df_peaks_csv_path}, with a lenght of {len(df_peaks)}")
 
                     #Timestamp to datetime
-                    if temporal_bool : df_peaks['Timestamp'] = df_peaks['start_time']
+                    timestamp_source = ("Timestamp" if "Timestamp" in df_peak.columns else "start_time")
+
+                    df_peaks['Timestamp'] = pd.to_datetime(df_peaks[timestamp_source],errors="coerce",utc=True)
+                    df_peaks = df_peaks.dropna(subset="Timestamp").copy()
+                    df_peaks = df_peaks.set_index("Timestamp",drop=True)
                     df_peaks['Peak'] = 1
-                    df_peaks['Timestamp'] = pd.to_datetime(df_peaks['Timestamp'])
-                    df_peaks["Timestamp"] = pd.to_datetime(df_peaks["Timestamp"],utc=True)
+
                 except Exception as e:
                     logger.error(f"An error occurred while trimming the dataframe {e}")
                     continue
@@ -642,16 +646,20 @@ def process_all_folders(input_folder, device_folders, PERIODO_AGREGACION, PERCEN
 
                     #merging
                     logger.info("Merging the peaks dataframe with the acoustic dataframe")
-                    df_all = df.merge(
-                        df_peaks[['Peak']],
+                    df_all = pd.merge_asof(
+                        df.sort_index(),
+                        df_peaks[["Peak"]].sort_index(),
                         left_index=True,
                         right_index=True,
-                        how='left'
+                        direction="nearest",
+                        tolerance=pd.Timedelta(seconds=1),
                     )
                     logger.info("Merge successful for the peaks and acoustic dataframes")
-                    print(df_all)
-                    print(df_all["Peak"].value_counts())
-                    print(df_all["Peak"].unique())
+                    logger.info(
+                        "Matched peaks: %d",
+                        int(df_all["Peak"].notna().sum()),
+                    )
+
                     #exit()
 
 
