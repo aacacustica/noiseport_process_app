@@ -273,7 +273,7 @@ def process_all_folders(folders,day_devices,yamnet_csv,oca_limits, logger):
             if csv_state.get("processed",False):
                 logger.info(f"Skipping already processed CSV: {csv_state['path']}")
                 continue
-            csv_path = Path(csv_state['Path'])
+            csv_path = Path(csv_state['path'])
             if not csv_path.is_absolute(): csv_path = folder / csv_path
     # ------------------------- Procesar CSV ------------------------------------------------------------------ # 
             try:
