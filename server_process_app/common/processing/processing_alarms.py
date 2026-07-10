@@ -150,13 +150,19 @@ def process_single_csv( csv_path,device,folder,yamnet_df,yamnet_csv,oca_limits,l
             if "Noise_Port_Level_1" in df.columns: cols_to_clear.append("Noise_Port_Level_1")
             df.loc[~mask, cols_to_clear] = pd.NA
         else:
-            logger.Warning(f"Prediction_1 or Prob_1 columns not found in df from: {csv_path}")
+            logger.warning(f"Prediction_1 or Prob_1 columns not found in df from: {csv_path}")
 
     except Exception as e: logger.exception(f" Exception while processing predictions file:{e}")
 
     # ------------------------- Transformar a datos de una hora ----------------------------------------- #
 
     try:
+        logger.info(
+            "periodo_agregacion=%r, type=%s, callable=%s",
+            periodo_agregacion,
+            type(periodo_agregacion).__name__,
+            callable(periodo_agregacion),
+        )
         df_1h = df.resample("1h").apply(periodo_agregacion)
         df_1h = df_1h.reset_index()
         df_1h = df_1h.round(1)
