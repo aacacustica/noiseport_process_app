@@ -766,11 +766,11 @@ def ask_date_time_changes():
     )
     
 
-def collect_folders(input_folder, change_time_flag,label_source_type, logger,point_filter):
+def collect_folders(input_folder,coeffs_path, change_time_flag,label_source_type, logger,point_filter):
     folders, coefficients, date_time, threshold = [], {}, {}, {}
     
     #Lectura de los coeficientes desde un JSON para no tener que escribirlos por consola
-    with open(COEFFS_PATH,'r') as f:
+    with open(coeffs_path,'r') as f:
         coeffs = json.load(f)
 
     if "raspberry" in label_source_type:

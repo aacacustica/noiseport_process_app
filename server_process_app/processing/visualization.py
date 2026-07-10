@@ -8,6 +8,7 @@ from server_process_app.common.misc.logging_config import *
 from server_process_app.common.config.config_vi import *
 from server_process_app.common.utils.utils import *
 from server_process_app.common.processing.processing_visualizations import *
+from server_process_app.common.utils.utils_vi import *
 
 logger = setup_logging('[Visualization]')
 config = load_config()
@@ -84,7 +85,7 @@ def main():
         for device_folder_path in devices_folder_paths:
 
             device_name = os.path.basename(device_folder_path)
-            folders, _, date_map, thresh_map = collect_folders(device_folder_path, change_date, device_folder_path,logger,point_to_process)
+            folders, _, date_map, thresh_map = collect_folders(device_folder_path,coeffs_path, change_date, device_folder_path,logger,point_to_process)
             
             device_coeff = collect_coeff(coeffs,device_name) 
             
