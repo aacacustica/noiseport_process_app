@@ -312,7 +312,10 @@ def collect_folders_days_devices(folders, devices):
             continue
 
         result[device_name]["files"].extend(
-            str(file)
+            {
+                "path": str(file),
+                "processed": False,
+            }
             for file in folder.iterdir()
             if file.is_file() and file.suffix.lower() == ".csv"
         )
