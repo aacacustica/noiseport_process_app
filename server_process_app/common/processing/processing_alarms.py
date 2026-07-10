@@ -240,8 +240,6 @@ def process_all_folders(folders,day_devices,yamnet_csv,oca_limits, logger):
     #    ]]
     for device,device_state in day_devices.items():
         
-        print(device)
-        print(device_state)
     # +------------------------------------------------------------+ #
     #   LOOP for each device in day_devices:                         #
     #        1. Comprobar si el dispositivo completo ya fue procesado#

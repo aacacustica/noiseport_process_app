@@ -13,11 +13,13 @@ from scipy.signal import find_peaks
 
 
 from server_process_app.common.config.config_vi import *
-from server_process_app.processing.peaks import *
 from server_process_app.common.utils.utils_vi import *
+from server_process_app.common.utils.utils import *
 from server_process_app.common.reading.reading_visualizations import *
 from server_process_app.common.graphics.visualization_visualization import *
 
+config = load_config()
+RELATIVE_PATH_SHIPS_1H = config['paths']['ships_1h']
 
 def load_data(file_path, logger, new_date=None, new_time=None, new_threshold_date=None, new_threshold_time=None, selected_folder=None):
     logger.info("")
