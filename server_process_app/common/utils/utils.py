@@ -296,8 +296,7 @@ def get_desired_query_folder(days_folder,desired_folder):
 
     return days_folder
 
-def collect_folders_days_devices(folders,devices):
-
+def collect_folders_days_devices(folders, devices):
     result = {
         device: {
             "files": [],
@@ -306,16 +305,16 @@ def collect_folders_days_devices(folders,devices):
         for device in devices
     }
 
-    for folder in map(Path,folders):
+    for folder in map(Path, folders):
         device_name = folder.parent.name
+
         if device_name not in result:
             continue
-            
-        result.setdefault(device_name,[]).extend(
+
+        result[device_name]["files"].extend(
             str(file)
             for file in folder.iterdir()
-            if file.is_file() and file.suffix.lower() == '.csv'
+            if file.is_file() and file.suffix.lower() == ".csv"
         )
-
 
     return result
