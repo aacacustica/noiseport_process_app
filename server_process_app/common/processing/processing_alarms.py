@@ -234,6 +234,13 @@ def process_all_folders(folders,day_devices,yamnet_csv,oca_limits, logger):
     #    ]]
     for device,device_state in day_devices.items():
         
+        invalid_states = {
+            device: state
+            for device, state in day_devices.items()
+            if not isinstance(state, dict)
+        }
+
+        print(invalid_states)
     # +------------------------------------------------------------+ #
     #   LOOP for each device in day_devices:                         #
     #        1. Comprobar si el dispositivo completo ya fue procesado#
