@@ -218,7 +218,7 @@ def process_single_csv( csv_path,device,folder,yamnet_df,yamnet_csv,oca_limits,l
 
 
 
-def process_all_folders(folders,day_devices,yamnet_csv,  oca_limits, logger):
+def process_all_folders(folders,day_devices,yamnet_csv,oca_limits, logger):
 
     folders_by_device = {Path(folder).parent.name: Path(folder) for folder in folders}
     yamnet_df = yamnet_csv[["display_name","NoisePort_Level_1"]]
