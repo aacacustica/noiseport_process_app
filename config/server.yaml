@@ -40,7 +40,7 @@ inference:
 models:
 
   yamnet_h5: server_process_app/common/resources/models/yamnet.h5
-  yamnet_class_map: server_process_app/common/resources/yamnet_class_map.csv
+  yamnet_class_map: server_process_app/common/resources/yamnet_class_AAC_v3_0.csv
   urban_taxonomy_mapping: server_process_app/common/resources/urban_taxonomy_map_v1_0.json
   port_taxonomy_mapping: server_process_app/common/resources/port_1_taxonomy_mapping_v2.0.json
 
