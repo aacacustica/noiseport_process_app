@@ -88,7 +88,10 @@ def main():
             folders, _, date_map, thresh_map = collect_folders(device_folder_path,coeffs_path, change_date, device_folder_path,logger,point_to_process)
             
             device_coeff = collect_coeff(coeffs,device_name) 
-            
+
+            logger.info(f"Generating visualization data for : {device_name} received data")
+            logger.info(f"Device fodler path: {device_folder_path}")
+            logger.info(f"Folders: {folders}")
             process_all_folders(
                 device_folder_path,
                 folders,
@@ -106,7 +109,7 @@ def main():
                 logger
             )
 
-            logger.info(f"Processing received data from : {device_name}")
+            
 
         logger.info("Finished all processing.")
 
