@@ -129,16 +129,16 @@ def main():
                 logger.error(f"Error saving peak csv: {e}")
         
 
-        try:
-            # ------------------------- List peak, acoustic and prediction files---------------------------------------------------------- #
+    try:
+        # ------------------------- List peak, acoustic and prediction files---------------------------------------------------------- #
 
-            hourly_acoustics_folders,hourly_predictions_folders,hourly_peaks_folders = list(get_hourly_folders_device(device,prediction_query_folder_tag,peaks_folder_name,acoustics_query_folder_tag))
+        hourly_acoustics_folders,hourly_predictions_folders,hourly_peaks_folders = list(get_hourly_folders_device(device,prediction_query_folder_tag,peaks_folder_name,acoustics_query_folder_tag))
 
-            # ------------------------- Merge peak,acoustic and prediction csvs----------------------------------------------------------- #
-            merge_acoustics_predictions_and_peaks(hourly_acoustics_folders,hourly_predictions_folders,hourly_peaks_folders,merged_folder_tag,logger)
+        # ------------------------- Merge peak,acoustic and prediction csvs----------------------------------------------------------- #
+        merge_acoustics_predictions_and_peaks(hourly_acoustics_folders,hourly_predictions_folders,hourly_peaks_folders,merged_folder_tag,logger)
 
-        except Exception as e:
-            logger.error(f"Error concatenating acoustics predictions and peaks: {e}")
+    except Exception as e:
+        logger.error(f"Error concatenating acoustics predictions and peaks: {e}")
 
 
 if __name__ == "__main__":

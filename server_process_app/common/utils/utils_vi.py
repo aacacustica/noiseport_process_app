@@ -6,7 +6,13 @@ import os
 
 
 from server_process_app.common.config.config_vi import *
+from server_process_app.common.utils.utils import * 
 
+config = load_config()
+RELATIVE_PATH_YAMNET_MAP = config['models']['yamnet_class_map']
+
+RELATIVE_PATH_TAXONOMY_PORT = config['models']['urban_taxonomy_mapping']
+RELATIVE_PATH_TAXONOMY_URBAN = config['models']['port_taxonomy_mapping']
 def collect_df_server(reg_folder):
 
 
