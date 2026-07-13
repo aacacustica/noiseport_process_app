@@ -163,7 +163,7 @@ def evaluation_period_str_valencia(hour_column):
     return period
 
 
-def add_night_column(hour_column, day_col):
+def add_night_column(hour_column, day_name):
     
     night_list = {
         'Lunes'     : "Lunes-Martes",
