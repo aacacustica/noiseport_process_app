@@ -188,6 +188,12 @@ def merge_acoustics_predictions_and_peaks(acoustics_paths,predictions_paths,peak
             df_ac = df_ac.dropna(subset=['Timestamp'])
             df_pr = df_pr.dropna(subset=['Timestamp'])
 
+        # Resolver duplicados de tiempo en predicciones
+        prediction_columns = ['Prediction_1','Prediction_2','Prediction_3','Prob_1','Prob_2','Prob_3']
+        df_pr['_has_prediction'] = (df_pr[prediction_columns].notna()).any(axis=1)
+        df_pr = (df_pr.sort_values(['Timestamp','_has_prediction'],ascending=[True,False]).drop_duplicates(subset="Timestamp",keep="first").drop(columns='_has_prediction'))
+
+        if df_pr['Timestamp'].duplicated().any(): raise ValueError("El dataframe de predicciones aún tiene timestamps duplicados")
         # Merge acústica + predicción por Timestamp (inner)
         try:
             df_merged = pd.merge(df_ac, df_pr, on='Timestamp', how='left', suffixes=('_acoustic', '_prediction'))
