@@ -541,7 +541,7 @@ def process_sonometer_xlsx(db,xlsx_path,logger,point, output_folder,count,proces
         logger.error(f"Error reading Measurement History sheet from {xlsx_path} ,  trying Time History sheet")
 
 
-def process_acoustic_folder(db,logger,folder_days,query_folder,processed_folder,processed_folder_txt,device):
+def process_acoustic_folder(db,logger,folder_days,query_folder,processed_folder,processed_folder_txt,header,device):
     if not os.path.exists(processed_folder_txt): open(processed_folder_txt, 'w').close()
     for day in tqdm.tqdm(folder_days, desc="[Acoustics] Processing days", unit="day"):
         

@@ -38,10 +38,10 @@ def arg_parser():
     return parser.parse_args()
 
 
-def acoustic_processing(folder_days,db,logger, query_acoustic_folder, processed_acoustics, processed_folder_acoustic_txt,device):
+def acoustic_processing(folder_days,db,logger, query_acoustic_folder, processed_acoustics, processed_folder_acoustic_txt,header,device):
     
     start_time = time.time()                 
-    process_acoustic_folder(db,logger,folder_days, query_acoustic_folder, processed_acoustics, processed_folder_acoustic_txt,device)                   
+    process_acoustic_folder(db,logger,folder_days, query_acoustic_folder, processed_acoustics, processed_folder_acoustic_txt,header,device)                   
     end_time =  round(time.time() - start_time,2)
     return end_time
 
@@ -192,8 +192,11 @@ def main():
             # ------------------------- Make queries ----------------------------- #
                 
             if acoustic_query_switch:
-                    
-                    acoustic_processing(days_folders_acoustics,db,logger,query_acoustic_folder,processed_acoustics_list,processed_folder_acoustic_txt_path,device)    
+                    if 'ccmp' in device:
+                        header = config['mysql']['headers']['THIRD_OCTAVES_SENSOR_FORMAT']
+                    else:
+                        header = config['mysql']['headers']['THIRD_OCTAVES_SENSOR_FORMAT']
+                    acoustic_processing(days_folders_acoustics,db,logger,query_acoustic_folder,processed_acoustics_list,processed_folder_acoustic_txt_path,header,device)    
                     if send_mqtt:
                         power_avg_results = power_laeq_avg(db,logger,device,acoustic_table_name)
                         send_mqtt_data(power_avg_results,logger,processed_mqtt_data_txt_path)              

@@ -14,7 +14,7 @@ devices:
   - id: raspberry3
     microphone_id: RPI_3
     calibration_constant: 0
-    enabled: false
+    enabled: true
     source_type: RP
 
   - id: raspberrypi4
@@ -26,7 +26,7 @@ devices:
   - id: ccmp13-dvk
     microphone_id: ccmp-dvk
     calibration_constant: 0
-    enabled: true
+    enabled: false
     source_type: sensor
 
   - id: ccmp13-dvk-2

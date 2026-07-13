@@ -638,10 +638,6 @@ def process_all_folders(input_folder, device_folders, PERIODO_AGREGACION, PERCEN
                         tolerance=pd.Timedelta(seconds=1),
                     )
                     logger.info("Merge successful for the peaks and acoustic dataframes")
-                    logger.info(
-                        "Matched peaks: %d",
-                        int(df_all["Peak"].notna().sum()),
-                    )
 
                     #exit()
 
@@ -688,9 +684,6 @@ def process_all_folders(input_folder, device_folders, PERIODO_AGREGACION, PERCEN
                     df_1h = df_1h.round(2)
                     logger.info(f"Transformed 1 second data to 1 hour data")
                     print(df_1h)
-                    #exit()
-
-
 
                     logger.info("")
                     logger.info("")

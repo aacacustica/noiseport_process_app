@@ -1,0 +1,1 @@
+00 * * * * /srv/services/noiseport_process_app/scripts/run_pipeline.h >> /var/log/noiseport_process_app/cron.log 2>&1

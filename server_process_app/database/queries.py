@@ -219,4 +219,6 @@ QUERYS = {
         SET
             `sensor_id` = '{device_id}'
     """,
+
+
     }

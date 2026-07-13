@@ -2,7 +2,7 @@ from pathlib import Path
 import os
 import yaml
 from dotenv import load_dotenv
-from server_process_app.common.utils.mysql_queries import QUERYS,TABLES
+from server_process_app.common.utils.mysql_queries import QUERYS,TABLES,HEADERS
 ROOT_DIR = Path(__file__).resolve().parents[3]
 
 load_dotenv(ROOT_DIR / ".env")
@@ -46,8 +46,9 @@ def load_settings() -> dict:
             "database": os.getenv("MYSQL_DATABASE"),
             "local_infile": os.getenv("MYSQL_LOCAL_INFILE", "0") == "1",
             "active_switch": os.getenv("MYSQL_USE_SWITCH", "0") == "1",
-            "querys": QUERYS,
-            "tables":TABLES
+            "queries": QUERYS,
+            "tables":TABLES,
+            "headers":HEADERS
         },
         "devices": devices.get("devices", []),
     }
