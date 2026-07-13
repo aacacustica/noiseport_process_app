@@ -5,6 +5,7 @@ import decimal
 import ssl
 import paho.mqtt.client as mqtt
 import pandas as pd
+import ast
 
 from server_process_app.common.config.config import *
 from server_process_app.common.utils.utils import *

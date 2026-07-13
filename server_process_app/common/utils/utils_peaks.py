@@ -1,6 +1,7 @@
 import pandas as pd
 import os
 import re
+import hashlib
 from pathlib import Path
 
 def merge_peaks(df_pk: pd.DataFrame, df_final: pd.DataFrame) -> pd.DataFrame:
@@ -71,6 +72,15 @@ def extract_key_from_filename(path: str):
         return m.group(1)
     
     return None
+
+def sha256_file(path):
+    digest = hashlib.sha256()
+
+    with open(path, "rb") as file:
+        for chunk in iter(lambda: file.read(1024 * 1024), b""):
+            digest.update(chunk)
+
+    return digest.hexdigest()
 
 def merge_acoustics_predictions_and_peaks(acoustics_paths,predictions_paths,peaks_paths,output_folder_name,logger):
       
@@ -195,11 +205,37 @@ def merge_acoustics_predictions_and_peaks(acoustics_paths,predictions_paths,peak
         df_final['is_peak'] = False
 
         # Si hay ficheros de peaks para esta clave, concatenarlos y normalizarlos
+        logger.info(
+            "Prediction source: %s size=%d mtime=%s",
+            pred_path,
+            os.path.getsize(pred_path),
+            os.path.getmtime(pred_path),
+        )
+
+        
+
+        
         if peak_files_for_key:
             try:
                 # leer y concatenar todos los peaks del mismo key (si hay varios)
                 list_pk = []
                 for pk_file in peak_files_for_key:
+                    logger.info(
+                        "Peak source: %s size=%d mtime=%s",
+                        pk_file,
+                        os.path.getsize(pk_file),
+                        os.path.getmtime(pk_file),
+                    )
+
+                    logger.info(
+                        "Prediction SHA256: %s",
+                        sha256_file(pred_path),
+                    )
+
+                    logger.info(
+                        "Peaks SHA256: %s",
+                        sha256_file(pk_file),
+                    )
                     df_pk_tmp = pd.read_csv(pk_file)
                     # estandarizar nombres de columnas y parseo de tiempos
                     df_pk_tmp.rename(columns={'start time': 'start_time', 'end time': 'end_time'}, inplace=True)
