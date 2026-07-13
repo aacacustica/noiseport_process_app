@@ -23,8 +23,8 @@ periodo_agregacion = config['alarms'] ['agg_period']
 
 def process_single_csv( csv_path,device,folder,yamnet_df,yamnet_csv,oca_limits,logger):
 
-    taxonomy_cols = []
-    base_cols                       = [ "id_micro","Filename","datetime","Timestamp","Unixtimestamp","LA","LC","LZ","LZ","LAmax","LAmin","LC-LA"]
+    taxonomy_cols                   = []
+    base_cols                       = ["id_micro","Filename","datetime","Timestamp","Unixtimestamp","LA","LA_corrected","LC","LZ","LAmax","LAmin","LC-LA"]
     peak_cols                       = ["is_peak","peak_start_time","peak_end_time","peak_duration_seconds","peak_sample_count","peak_leq","peak_LA_values"]
 
     csv_path                        = Path(csv_path)
@@ -90,7 +90,7 @@ def process_single_csv( csv_path,device,folder,yamnet_df,yamnet_csv,oca_limits,l
     band_cols       = [c for c in df.columns if c.endswith("Hz")]
     pred_cols       = [c for c in df.columns if c.startswith("Prediction_") or c.startswith("Prob_")]
     peak_cols       = [c for c in peak_cols if c in df.columns]
-    ordered_cols    = [c for c in base_cols + band_cols + pred_cols+taxonomy_cols + peak_cols if c in df.columns]
+    ordered_cols    = list(dict.fromkeys(column for column in (base_cols + band_cols + pred_cols + taxonomy_cols + peak_cols) if column in df.columns))
 
     df              = df[ordered_cols]
     df              = df.sort_values("datetime").reset_index(drop=True)
@@ -147,7 +147,14 @@ def process_single_csv( csv_path,device,folder,yamnet_df,yamnet_csv,oca_limits,l
     try:
 
         if "Prediction_1" in df.columns and "Prob_1" in df.columns:
+            duplicated_columns = df.columns[df.columns.duplicated()].tolist()
+            if duplicated_columns:
+                logger.warning(f"Removing duplicated columns: {duplicated_columns}")
+                df = df.loc[:, ~df.columns.duplicated()].copy()
+
             mask = df["Prob_1"] >= probability_threshold
+            df['class'] = df['Prediction_1']
+            taxonomy_cols = [column for column in ("class","NoisePort_Level_1") if column in df.columns]
             cols_to_clear = ["Prediction_1","Prob_1"]
             if "NoisePort_Level_1" in df.columns: cols_to_clear.append("Noise_Port_Level_1")
             df.loc[~mask, cols_to_clear] = pd.NA
@@ -168,7 +175,11 @@ def process_single_csv( csv_path,device,folder,yamnet_df,yamnet_csv,oca_limits,l
         agg_rule = f"{int(periodo_agregacion)}s"
         weekday_translation = {"Monday": "Lunes","Tuesday": "Martes","Wednesday": "Miércoles","Thursday": "Jueves","Friday": "Viernes","Saturday": "Sábado","Sunday": "Domingo"}
 
-        df_agg = df.resample(agg_rule).apply(agg_hour).reset_index().round(1)
+        is_peak_agg = df['is_peak'].fillna(False).astype(bool).resample(agg_rule).max()
+        df_agg = df.resample(agg_rule).apply(agg_hour)
+        df_agg['is_peak'] = is_peak_agg
+        df_agg = df_agg.reset_index().round(1)
+        
 
         df_agg["hour"] = df_agg["datetime"].dt.hour
         df_agg["day_name"] = df_agg["datetime"].dt.day_name().map(weekday_translation)

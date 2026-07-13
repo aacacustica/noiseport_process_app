@@ -3026,10 +3026,19 @@ def l90_alarm_dynamic(df_1h: pd.DataFrame, logger, threshold_dB: int):
     df_1h = df_1h.copy()
     df_1h.rename(columns={"90percentile": "L90"}, inplace=True)
 
-    df_1h["L90_rolling_median"] = df_1h["L90"].rolling(window=3, min_periods=1).median()
-    df_1h["alarm"] = df_1h["L90"] > df_1h["L90_rolling_median"] + threshold_dB
+    df_1h['L90']                        = pd.to_numeric(df_1h['L90'],errors='coerce')
 
-    df_1h["l90_alarm"] = np.where(df_1h["alarm"], 1, np.nan)
+    if df_1h['L90'].notna().sum() == 0:
+        logger.warning('L90  contains no valid numeric values; skipping L90 alarm')
+        df_1h['L90_rolling_median']     = pd.NA
+        df_1h['l90_alarm']              = False
+
+        return df_1h
+    
+    df_1h["L90_rolling_median"]         = df_1h["L90"].rolling(window=3, min_periods=1).median()
+    df_1h["alarm"]                      = df_1h["L90"] > df_1h["L90_rolling_median"] + threshold_dB
+
+    df_1h["l90_alarm"]                  = np.where(df_1h["alarm"], 1, np.nan)
     df_1h.drop(columns=["L90_rolling_median", "alarm"], inplace=True)
     logger.info(f"Added column 'l90_alarm' with dynamic threshold +{threshold_dB} dB")
     return df_1h

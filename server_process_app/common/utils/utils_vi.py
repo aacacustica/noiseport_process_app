@@ -165,8 +165,7 @@ def evaluation_period_str_valencia(hour_column):
 
 def add_night_column(hour_column, day_col):
     
-    night_list={
-
+    night_list = {
         'Lunes'     : "Lunes-Martes",
         'Martes'    : "Martes-Miércoles",
         'Miércoles' : "Miércoles-Jueves",
@@ -174,26 +173,25 @@ def add_night_column(hour_column, day_col):
         'Viernes'   : "Viernes-Sábado",
         'Sábado'    : "Sábado-Domingo",
         'Domingo'   : "Domingo-Lunes"
-        
-        }
+    }
 
-    
-    night = ''
+    previous_day = {
+        'Lunes'     : 'Domingo',
+        'Martes'    : 'Lunes',
+        'Miércoles' : 'Martes',
+        'Jueves'    : 'Miércoles',
+        'Viernes'   : 'Jueves',
+        'Sábado'    : 'Viernes',
+        'Domingo'   : 'Sábado'
+    }
+   
+    day_name = str(day_name).strip()
 
-    if hour_column >= 23:
+    if day_name not in night_list:  return ""
+    if hour_column >= 23:           return night_list[day_name]
+    if hour_column < 7:             return night_list[previous_day[day_name]]
 
-        night=night_list[str(day_col).replace(" ","")]
-
-    elif hour_column < 7:
-
-        pos=0
-        for i in night_list:
-            pos+=1
-            if i == day_col.replace(" ",""):
-                listForm = list(night_list.values())
-                night = listForm[pos+1]
-    return night
-
+    return ""
 
 def trim_dataframe(df, start_seconds, end_seconds, logger, name):
 
