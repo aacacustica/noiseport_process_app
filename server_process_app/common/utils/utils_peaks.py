@@ -26,7 +26,10 @@ def merge_peaks(df_pk: pd.DataFrame, df_final: pd.DataFrame) -> pd.DataFrame:
         ts = ts.tz_localize(None)
         matches = df_pk[intervals.contains(ts)]
         if not matches.empty:
-            # Tomamos solo la primera coincidencia
+            # Si existen varios picos solapados se conserva unicamente 
+            # el primero en orden cronológico. El objetivo del merged es
+            # disponer de un único evento asociado a cada instante cuando existe
+            # para visualización y alarmas
             df_picos_matched.iloc[i] = matches.iloc[0]
             df_final.at[i,'is_peak'] = True
 
@@ -217,10 +220,7 @@ def merge_acoustics_predictions_and_peaks(acoustics_paths,predictions_paths,peak
             os.path.getsize(pred_path),
             os.path.getmtime(pred_path),
         )
-
-        
-
-        
+ 
         if peak_files_for_key:
             try:
                 # leer y concatenar todos los peaks del mismo key (si hay varios)
