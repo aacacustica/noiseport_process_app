@@ -61,7 +61,7 @@ def main():
     enabled_devices_paths               = [os.path.join(inbox_folder,device['id']) for device in devices if device['enabled'] == True]
     enabled_devices_names               = [device['id'] for device in devices if device['enabled'] == True]
     taxonomy                            = mode
-    folders                             = collect_folders_server(devices,merged_folder_name)
+    
     
     try:
         
@@ -70,7 +70,7 @@ def main():
         devices                                 = load_devices()
         oca_limits                              = resolve_oca_type(limit_oca)
         days_devices                            = collect_folders_days_devices(folders,enabled_devices_names)
-
+        folders                                 = collect_folders_server(devices,merged_folder_name)
         
         process_all_folders(
             folders             = folders,
