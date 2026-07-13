@@ -69,9 +69,9 @@ def main():
         urban_taxonomy_map, port_taxonomy_map   = taxonomy_json()
         devices                                 = load_devices()
         oca_limits                              = resolve_oca_type(limit_oca)
-        days_devices                            = collect_folders_days_devices(folders,enabled_devices_names)
         folders                                 = collect_folders_server(devices,merged_folder_name)
-        
+        days_devices                            = collect_folders_days_devices(folders,enabled_devices_names)
+
         process_all_folders(
             folders             = folders,
             day_devices         = days_devices,
