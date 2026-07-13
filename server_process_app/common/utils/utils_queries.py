@@ -19,7 +19,7 @@ MQTT_PASSWORD_MUUTECH           = config['mqtt']['password']
 MQTT_BROKER_MUUTECH             = config['mqtt']['host']
 
 DATABASE_NAME                   = config['mysql']['database']
-QUERYS                          = config['mysql']['querys']
+QUERYS                          = config['mysql']['queries']
 TABLES                          = config['mysql']['tables']
 
 ACOUSTIC_TABLE_NAME             = config['queries']['acoustic_table_name']

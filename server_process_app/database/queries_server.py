@@ -193,9 +193,12 @@ def main():
                 
             if acoustic_query_switch:
                     if 'ccmp' in device:
-                        header = config['mysql']['headers']['THIRD_OCTAVES_SENSOR_FORMAT']
+                        HEADER = config['mysql']['headers']
+                        header = HEADER['THIRD_OCTAVES_SENSOR_FORMAT']
                     else:
-                        header = config['mysql']['headers']['THIRD_OCTAVES_SENSOR_FORMAT']
+                        HEADER = config['mysql']['headers']
+                        header = HEADER['THIRD_OCTAVES_SENSOR_FORMAT']
+                        
                     acoustic_processing(days_folders_acoustics,db,logger,query_acoustic_folder,processed_acoustics_list,processed_folder_acoustic_txt_path,header,device)    
                     if send_mqtt:
                         power_avg_results = power_laeq_avg(db,logger,device,acoustic_table_name)
