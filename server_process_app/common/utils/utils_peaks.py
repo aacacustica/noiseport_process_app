@@ -42,7 +42,7 @@ def _to_datetime_no_tz(series: pd.Series):
     series = pd.to_datetime(series, errors='coerce')
     # si es tz-aware, convertir a naive
     if pd.api.types.is_datetime64tz_dtype(series.dtype):
-        series = series.dt.tz_convert(None)
+        series = series.dt.tz_localize(None)
     return series
 
 def extract_key_from_filename(path: str):
