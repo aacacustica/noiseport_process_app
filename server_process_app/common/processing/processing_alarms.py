@@ -25,7 +25,7 @@ def process_single_csv( csv_path,device,folder,yamnet_df,yamnet_csv,oca_limits,l
 
     taxonomy_cols = []
     base_cols                       = [ "id_micro","Filename","datetime","Timestamp","Unixtimestamp","LA","LC","LZ","LZ","LAmax","LAmin","LC-LA"]
-    peak_cols                       = ["is_peak","peak_start_time","peak_end_duration","peak_leq","peak_LA_values"]
+    peak_cols                       = ["is_peak","peak_start_time","peak_end_time","peak_duration_seconds","peak_sample_count","peak_leq","peak_LA_values"]
 
     csv_path                        = Path(csv_path)
     base_dir                        = os.path.dirname(csv_path)
@@ -59,7 +59,7 @@ def process_single_csv( csv_path,device,folder,yamnet_df,yamnet_csv,oca_limits,l
     #        3. Añadir columna datetime                              #
     #        4. Añadir columna indicadores, oca y noche              #
     #        5. Procesar predicciones                                #
-    #        5. Generación de df_1h, datos de 1s a datos de 1h       #
+    #        5. Generación de df_agg, datos de 1s a datos de 1h       #
     #        6. Cálculo de alarmas                                   #
     #        7. Gráficos                                             #
     #        8. Guardado                                             #
@@ -94,7 +94,7 @@ def process_single_csv( csv_path,device,folder,yamnet_df,yamnet_csv,oca_limits,l
 
     df              = df[ordered_cols]
     df              = df.sort_values("datetime").reset_index(drop=True)
-    df.to_csv(output_path, index=False)
+    
 
     # ------------------------- Creación de carpetas ----------------------------------------------- #
     os.makedirs(post_dir,                   exist_ok=True)
@@ -104,6 +104,8 @@ def process_single_csv( csv_path,device,folder,yamnet_df,yamnet_csv,oca_limits,l
     os.makedirs(ia_visualization_folder,    exist_ok=True)
 
     # ------------------------- Añadir columna datetime --------------------------------------------- #
+
+    df.to_csv(output_path, index=False)
     try:
         if df is None:
             logger.exception(f"DF from {csv_path} is none")
@@ -112,8 +114,8 @@ def process_single_csv( csv_path,device,folder,yamnet_df,yamnet_csv,oca_limits,l
         df = add_datetime_columns(df,logger,date_col='datetime')
         df = df.sort_values('datetime')
         df = df.set_index('datetime', drop=True)
-        start_date = df.index[0]
-        end_date = df.index[1]
+        start_date = df.index.min()
+        end_date = df.index.max()
 
         logger.info(f"Start date and end date are [{start_date} ,{end_date}]")
 
@@ -127,7 +129,7 @@ def process_single_csv( csv_path,device,folder,yamnet_df,yamnet_csv,oca_limits,l
             logger.exception(f"DF from {csv_path} is none")
             return
         
-        if df is not None: df['night_str'] = df.apply(lambda x: add_night_column(x['hour'], x['weekday']), axis=1)
+        if df is not None: df['night_str'] = df.apply(lambda x: add_night_column(x['hour'], x['day_name']), axis=1)
         else:
             logger.exception(f"DF from {csv_path} is none")
             return
@@ -147,7 +149,7 @@ def process_single_csv( csv_path,device,folder,yamnet_df,yamnet_csv,oca_limits,l
         if "Prediction_1" in df.columns and "Prob_1" in df.columns:
             mask = df["Prob_1"] >= probability_threshold
             cols_to_clear = ["Prediction_1","Prob_1"]
-            if "Noise_Port_Level_1" in df.columns: cols_to_clear.append("Noise_Port_Level_1")
+            if "NoisePort_Level_1" in df.columns: cols_to_clear.append("Noise_Port_Level_1")
             df.loc[~mask, cols_to_clear] = pd.NA
         else:
             logger.warning(f"Prediction_1 or Prob_1 columns not found in df from: {csv_path}")
@@ -163,22 +165,24 @@ def process_single_csv( csv_path,device,folder,yamnet_df,yamnet_csv,oca_limits,l
             type(periodo_agregacion).__name__,
             callable(periodo_agregacion),
         )
-        df_1h = df.resample("1h").apply(agg_hour)
-        df_1h = df_1h.reset_index()
-        df_1h = df_1h.round(1)
+        agg_rule = f"{int(periodo_agregacion)}s"
+        weekday_translation = {"Monday": "Lunes","Tuesday": "Martes","Wednesday": "Miércoles","Thursday": "Jueves","Friday": "Viernes","Saturday": "Sábado","Sunday": "Domingo"}
 
-        df_1h["hour"] = df_1h["datetime"].dt.hour
-        df_1h["weekday"] = df_1h["datetime"].dt.weekday
-        df_1h["indicador_str"] = df_1h["hour"].apply(evaluation_period_str)
-        df_1h["night_str"] = df_1h.apply(lambda x: add_night_column(x["hour"], x["weekday"]), axis=1)
-        df_1h["oca"] = df_1h["hour"].apply(lambda h: db_limit(h, **oca_limits))
+        df_agg = df.resample(agg_rule).apply(agg_hour).reset_index().round(1)
+
+        df_agg["hour"] = df_agg["datetime"].dt.hour
+        df_agg["day_name"] = df_agg["datetime"].dt.day_name().map(weekday_translation)
+        df_agg["indicador_str"] = df_agg["hour"].apply(evaluation_period_str)
+        df_agg["night_str"] = df_agg.apply(lambda x: add_night_column(x["hour"], x["day_name"]), axis=1)
+        df_agg["oca"] = df_agg["hour"].apply(lambda h: db_limit(h, **oca_limits))
 
     except Exception as e:
         logger.exception(f"Exception transforming one second data: {e} in file : {csv_path}")
+        return
 
     # ------------------------- Creación de alarmas ---------------------------------------------------- #
 
-    try: df_alarms_1h = oca_alarm(df_1h, logger=logger)
+    try: df_alarms_1h = oca_alarm(df_agg, logger=logger)
     except Exception as e: logger.exception(f"Exception while creating OCA alarm: {e} in file : {csv_path}")
 
     try: df_alarms_1h = lmax_alarm(df_alarms_1h, logger=logger, threshold=95)
@@ -190,10 +194,10 @@ def process_single_csv( csv_path,device,folder,yamnet_df,yamnet_csv,oca_limits,l
     try: df_alarms_1h = l90_alarm_dynamic(df_alarms_1h, logger=logger, threshold_dB=5)
     except Exception as e: logger.exception(f"Exception while creating LC_LA alarm: {e} in file: {csv_path}")
 
-    try: df_alarms_1h = frequency_composition(df_1h,df_alarms_1h,logger=logger,threshold_comp=5)
+    try: df_alarms_1h = frequency_composition(df_agg,df_alarms_1h,logger=logger,threshold_comp=5)
     except Exception as e: logger.exception(f"Exception while creating Freq_composition alarm: {e} in file: {csv_path}")
 
-    try: df_alarms_1h = tonal_frequency(df_1h,df_alarms_1h,folder_output_dir_1h,logger,plotname=folder)
+    try: df_alarms_1h = tonal_frequency(df_agg,df_alarms_1h,folder_output_dir_1h,logger,plotname=folder)
     except Exception as e: logger.exception(f"Exception while creating Tonal_frequency alarm: {e} in file: {csv_path}")
 
     # ------------------------- Creación de gráficos ---------------------------------------------------- #

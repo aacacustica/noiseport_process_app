@@ -58,17 +58,17 @@ def main():
 
 
     devices_ids                         = [device['id'] for device in devices if device['enabled'] == True]
-    enabled_devices_folder_paths        = [os.path.join(inbox_folder,device['id']) for device in devices if device['enabled'] == True]
+    enabled_devices_paths               = [os.path.join(inbox_folder,device['id']) for device in devices if device['enabled'] == True]
     enabled_devices_names               = [device['id'] for device in devices if device['enabled'] == True]
     taxonomy                            = mode
-
+    folders                             = collect_folders_server(devices,merged_folder_name)
+    
     try:
         
         yamnet_csv                              = yamnet_class_map_csv()
         urban_taxonomy_map, port_taxonomy_map   = taxonomy_json()
         devices                                 = load_devices()
         oca_limits                              = resolve_oca_type(limit_oca)
-        folders                                 = collect_folders_server(devices,merged_folder_name)
         days_devices                            = collect_folders_days_devices(folders,enabled_devices_names)
 
         

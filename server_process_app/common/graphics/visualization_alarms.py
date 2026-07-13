@@ -4317,7 +4317,7 @@ def plot_peak_distribution(df_alarms_1h: pd.DataFrame,folder_output_dir: str,log
 
 def plot_density_distribution_peaks(df_alarms_1h: pd.DataFrame,folder_output_dir: str,logger,plotname: str):
     try:
-        folder_output_dir.join(MERGED_FOLDER)
+        
         sns.set_style("whitegrid")
         df = df_alarms_1h.copy()
 
@@ -4407,7 +4407,7 @@ def plot_predic_peak_laeq_mean(df_all_yamnet: pd.DataFrame, taxonomy_map: dict, 
         # exit()
         #########################################################
         #### Plotting the data ####
-        folder_output_dir.join(MERGED_FOLDER)
+        
         display_name = 'display_name'
         iso_taxonomy = 'iso_taxonomy'
         classes = 'class'
@@ -4481,7 +4481,7 @@ def plot_predic_peak_laeq_mean(df_all_yamnet: pd.DataFrame, taxonomy_map: dict, 
 
 def plot_predic_peak_laeq_mean_week(df_all_yamnet: pd.DataFrame, taxonomy_map: dict, folder_output_dir: str, logger, plotname: str):
     try:
-        df_all_yamnet = df_all_yamnet[df_all_yamnet['Peak'] == 1].copy()
+        df_all_yamnet = df_all_yamnet[df_all_yamnet['is_peak'] == 1].copy()
         df_all_yamnet['Timestamp'] = pd.to_datetime(df_all_yamnet['Timestamp'])
         try:
             df_all_yamnet['week'] = df_all_yamnet['Timestamp'].dt.to_period('W').start_time
@@ -4569,7 +4569,7 @@ def plot_box_plot_prediction(df_all_yamnet: pd.DataFrame, taxonomy_map: dict, fo
     try:
 
         sns.set_style("whitegrid")
-        df_all_yamnet = df_all_yamnet[df_all_yamnet['Peak'] == 1].copy()
+        df_all_yamnet = df_all_yamnet[df_all_yamnet['is_peak'] == 1].copy()
 
         sns.boxplot(data=df_all_yamnet, x='NoisePort_Level_1', y='LA_corrected')
 
@@ -4597,9 +4597,9 @@ def plot_box_plot_prediction(df_all_yamnet: pd.DataFrame, taxonomy_map: dict, fo
 
 def plot_box_plot_prediction_week(df_all_yamnet: pd.DataFrame, taxonomy_map: dict, folder_output_dir: str, logger, plotname: str):
     try:
-        folder_output_dir.join(MERGED_FOLDER)
+        
         sns.set_style("whitegrid")
-        df_all_yamnet = df_all_yamnet[df_all_yamnet['Peak'] == 1].copy()
+        df_all_yamnet = df_all_yamnet[df_all_yamnet['is_peak'] == 1].copy()
         df_all_yamnet['Timestamp'] = pd.to_datetime(df_all_yamnet['Timestamp'])
         try:
             df_all_yamnet['week'] = df_all_yamnet['Timestamp'].dt.to_period('W').start_time
@@ -4642,8 +4642,8 @@ def plot_box_plot_prediction_week(df_all_yamnet: pd.DataFrame, taxonomy_map: dic
 
 def plot_heat_map_prediction(df_all_yamnet: pd.DataFrame, taxonomy_map: dict, folder_output_dir: str, logger, plotname: str):
     try:
-        folder_output_dir.join(MERGED_FOLDER)
-        df_all_yamnet = df_all_yamnet[df_all_yamnet['Peak'] == 1].copy()
+       
+        df_all_yamnet = df_all_yamnet[df_all_yamnet['is_peak'] == 1].copy()
         df_all_yamnet['Timestamp'] = pd.to_datetime(df_all_yamnet['Timestamp'])
         try:
             df_all_yamnet['week'] = df_all_yamnet['Timestamp'].dt.to_period('W').start_time
@@ -4700,7 +4700,7 @@ def plot_heat_map_prediction(df_all_yamnet: pd.DataFrame, taxonomy_map: dict, fo
 def plot_heat_map_prediction_week(df_all_yamnet: pd.DataFrame, taxonomy_map: dict, folder_output_dir: str, logger, plotname: str):
     try:
         folder_output_dir.join(MERGED_FOLDER)
-        df_all_yamnet = df_all_yamnet[df_all_yamnet['Peak'] == 1].copy()
+        df_all_yamnet = df_all_yamnet[df_all_yamnet['is_peak'] == 1].copy()
         df_all_yamnet['Timestamp'] = pd.to_datetime(df_all_yamnet['Timestamp'])
 
         try:
