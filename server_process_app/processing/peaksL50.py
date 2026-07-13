@@ -117,36 +117,36 @@ def main():
                         "leq":              round(leq(values), 1),
                         "LA_values":        values.tolist(),
                     })
-            """
-            # ------------------------- find peaks ---------------------------------------------------- #            
-                if not above_threshold.empty:
-                    peaks, properties   = find_peaks(above_threshold['LA'], prominence=prominence, width=width)
-                    df_peaks            = above_threshold.iloc[peaks]
-                    
-                    logging.info(f"Detected {len(df_peaks)} peaks")
+                    """
+                    # ------------------------- find peaks ---------------------------------------------------- #            
+                        if not above_threshold.empty:
+                            peaks, properties   = find_peaks(above_threshold['LA'], prominence=prominence, width=width)
+                            df_peaks            = above_threshold.iloc[peaks]
+                            
+                            logging.info(f"Detected {len(df_peaks)} peaks")
 
-            # ------------------------- find peaks duration -------------------------------------------- #
-                    start_points    = properties['left_ips'].astype(int)
-                    end_points      = properties['right_ips'].astype(int)
-                    durations       = end_points - start_points
-                
-                    
-            # ------------------------- create csv -------------------------------------------------------- #
-                    peak_data = []
-                    for start, end in zip(start_points, end_points):
-                        peak_LA_values = above_threshold['LA'].iloc[start:end+1].values
-                        leq_value = leq(peak_LA_values)
+                    # ------------------------- find peaks duration -------------------------------------------- #
+                            start_points    = properties['left_ips'].astype(int)
+                            end_points      = properties['right_ips'].astype(int)
+                            durations       = end_points - start_points
                         
-                        peak_data.append({
-                            'filename':             above_threshold['Filename'].iloc[start],
-                            'start_time':           above_threshold['Timestamp'].iloc[start],
-                            'end_time':             above_threshold['Timestamp'].iloc[end],
-                            'duration':             int(end - start),
-                            'leq':                  round(leq_value, 1),
-                            'LA_values':            peak_LA_values.tolist()
-                        })
+                            
+                    # ------------------------- create csv -------------------------------------------------------- #
+                            peak_data = []
+                            for start, end in zip(start_points, end_points):
+                                peak_LA_values = above_threshold['LA'].iloc[start:end+1].values
+                                leq_value = leq(peak_LA_values)
+                                
+                                peak_data.append({
+                                    'filename':             above_threshold['Filename'].iloc[start],
+                                    'start_time':           above_threshold['Timestamp'].iloc[start],
+                                    'end_time':             above_threshold['Timestamp'].iloc[end],
+                                    'duration':             int(end - start),
+                                    'leq':                  round(leq_value, 1),
+                                    'LA_values':            peak_LA_values.tolist()
+                                })
 
-            """        
+                    """        
             # ------------------------- save csv----------------------------------------------------------- #
                     peaks_df = pd.DataFrame(peak_data)
                     output_file_name = os.path.join(output_folder, f"peaks_detection_{device_name}_{date_csv_file}.csv") 
