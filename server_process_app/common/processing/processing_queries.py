@@ -7,7 +7,8 @@ import wave
 import contextlib
 import datetime 
 import datetime
-
+import warnings
+warnings.filterwarnings("ignore")
 
 from ast import literal_eval
 from pathlib import Path
@@ -16,9 +17,16 @@ from pathlib import Path
 from server_process_app.database.queries_server import *
 from server_process_app.common.config.config import *
 from server_process_app.common.utils.utils_queries import *
+from server_process_app.common.config.settings import *
 
-import warnings
-warnings.filterwarnings("ignore")
+
+config = load_config()
+
+HEADERS = config['mysql']['headers']
+
+THIRD_OCTAVES = HEADERS['THIRD_OCTAVES']
+THIRD_OCTAVES_TIME_HISTORY = HEADERS['THIRD_OCTAVES_TIME_HISTORY']
+THIRD_OCTAVES_SENSOR_FORMAT = HEADERS['THIRD_OCTAVES_SENSOR_FORMAT']
 
 
 def is_current_day_folder(day_path):
