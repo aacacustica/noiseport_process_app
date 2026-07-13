@@ -3765,7 +3765,7 @@ def tonal_frequency(
     # -------------------------
     # 3. Aggregate by hour → predominant tonal band
     # -------------------------
-    df_tonal_freq["hour_dt"] = df_tonal_freq["date"].dt.floor("H")
+    df_tonal_freq["hour_dt"] = df_tonal_freq["date"].dt.floor("h")
     band_counts = df_tonal_freq.groupby(["hour_dt", "band"]).size().unstack(fill_value=0)
 
     def get_predominant_band(row):
@@ -3785,7 +3785,7 @@ def tonal_frequency(
 
     df_alarms_1h = df_alarms_1h.copy()
     df_alarms_1h["datetime"] = pd.to_datetime(df_alarms_1h["datetime"])
-    df_alarms_1h["hour_dt"] = df_alarms_1h["datetime"].dt.floor("H")
+    df_alarms_1h["hour_dt"] = df_alarms_1h["datetime"].dt.floor("h")
 
     df_alarms_1h = df_alarms_1h.merge(
         df_predominant_bands,
