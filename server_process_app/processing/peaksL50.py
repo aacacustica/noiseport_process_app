@@ -85,7 +85,39 @@ def main():
             # ------------------------- dynamic median for the LA values with a window of 30 seconds -- #
                 df['LA_median'] = df['LA'].rolling(window=window_size, min_periods=1).quantile(0.5) + adding_threshold
                 above_threshold = df[df['LA'] > df['LA_median']]
-            
+
+                #TEST
+                la = pd.to_numeric(df['LA'],errors='coerce')
+                dynamic_threshold = (la.rolling(window=window_size,min_periods=1).median() + adding_threshold )
+                peak_indices, properties = find_peaks(la.to_numpy(),prominence=prominence,width=width)
+                valid_peak_indices = [idx for idx in peak_indices if la.iloc[idx] > dynamic_threshold.iloc[idx]]
+
+                peak_data = []
+
+                for peak_idx, left_ip, right_ip in zip(peak_indices,properties['left_ips'],properties['right_ips']):
+                    if la.iloc[peak_idx] <= dynamic_threshold.iloc[peak_idx]: continue
+                    
+                    start  = max(0, int(np.floor(left_ip)))
+                    end    = min(len(df) - 1, int(np.ceil(right_ip)))
+
+                    values = la.iloc[start : end + 1].dropna().to_numpy()
+
+                    if values.size == 0: continue
+
+                    start_time  = df['Timestamp'].iloc[start]
+                    end_time    = df['Timestamp'].iloc[end] 
+
+                    peak_data.append(
+                    {
+                        "filename":         df["Filename"].iloc[peak_idx],
+                        "start_time":       start_time,
+                        "end_time":         end_time,
+                        "duration_seconds": (end_time - start_time).total_seconds(),      
+                        "sample_count":     int(end - start + 1),
+                        "leq":              round(leq(values), 1),
+                        "LA_values":        values.tolist(),
+                    })
+            """
             # ------------------------- find peaks ---------------------------------------------------- #            
                 if not above_threshold.empty:
                     peaks, properties   = find_peaks(above_threshold['LA'], prominence=prominence, width=width)
@@ -114,7 +146,7 @@ def main():
                             'LA_values':            peak_LA_values.tolist()
                         })
 
-                    
+            """        
             # ------------------------- save csv----------------------------------------------------------- #
                     peaks_df = pd.DataFrame(peak_data)
                     output_file_name = os.path.join(output_folder, f"peaks_detection_{device_name}_{date_csv_file}.csv") 
