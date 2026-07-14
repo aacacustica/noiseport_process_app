@@ -155,7 +155,7 @@ def process_single_csv( csv_path,device,folder,yamnet_df,yamnet_csv,oca_limits,l
                 df = df.loc[:, ~df.columns.duplicated()].copy()
             
             df['Prob_1'] = pd.to_numeric(df['Prob_1'],errors='coerce')
-            mask = df['Prob1'] >= probability_threshold
+            mask = df['Prob_1'] >= probability_threshold
             df['class'] = df['Prediction_1']
             cols_to_clear = [column for column in ('Prediction_1','Prob_1','class','NoisePort_Level_1')]
             df.loc[~mask, cols_to_clear] = pd.NA
