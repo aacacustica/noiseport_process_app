@@ -162,7 +162,10 @@ def evaluation_period_str_valencia(hour_column):
         period = 'Ln_valencia'
     return period
 
-def ensure_timestamp_column(df: pd.DataFrame,logger) -> pd.DataFrame | None:
+def ensure_timestamp_column(
+    df: pd.DataFrame,
+    logger,
+) -> pd.DataFrame | None:
     result = df.copy()
 
     if 'Timestamp' in result.columns:
