@@ -188,7 +188,7 @@ def ensure_timestamp_column(df: pd.DataFrame,logger):
 
     return result
 
-def group_daily_results_by_week(daily_results,logger):
+def group_daily_results_by_week(daily_results: Iterable[str],logger):
 
     grouped = defaultdict(list)
 
