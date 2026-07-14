@@ -72,11 +72,19 @@ def main():
         folders                                 = collect_folders_server(devices,merged_folder_name)
         days_devices                            = collect_folders_days_devices(folders,enabled_devices_names)
 
+        if mode == 'port':
+            taxonomy_map = port_taxonomy_map
+        elif mode == 'urban':
+            taxonomy_map = urban_taxonomy_map
+        else:
+            raise ValueError(f"Invalid alarms.mode {mode}")
+
         process_all_folders(
             folders             = folders,
             day_devices         = days_devices,
             yamnet_csv          = yamnet_csv,
             oca_limits          = oca_limits,
+            taxonomy_map        = taxonomy_map,
             logger              = logger
         )
             

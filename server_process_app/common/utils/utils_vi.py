@@ -6,9 +6,12 @@ import subprocess
 import os
 import json
 
-from pathlib import Path
+
 from pandas.api.types import is_datetime64_any_dtype
 from typing import Optional
+from collections import defaultdict
+from pathlib import Path
+from typing import Dict, Iterable, List
 
 from server_process_app.common.config.config_vi import *
 from server_process_app.common.utils.utils import * 
@@ -185,6 +188,56 @@ def ensure_timestamp_column(df: pd.DataFrame,logger):
 
     return result
 
+def group_daily_results_by_week(daily_results,logger):
+
+    grouped = defaultdict(list)
+
+    for result_path in daily_results:
+        path = Path(result_path)
+
+        if not path.is_file():
+            logger.warning(f"Weekly input does not exist {path}")
+            continue
+
+        match = re.search(r"(\d{8})",path.stem)
+
+        if not match:
+            logger.warning(f"Could not extract date from weekly input {path}")
+            continue
+
+        try:
+            file_date = pd.to_datetime(match.group(1),format="%Y%m%d")
+        except ValueError:
+            logger.warning(f"Invalid date in weekly input filename {path}")
+            continue
+
+        week_start = (file_date.to_period("W-SUN").start_time.normalize())
+
+        grouped[week_start].append(path)
+    
+    return dict(grouped)
+
+def find_daily_output_for_csv(csv_path):
+    csv_path = Path(csv_path)
+
+    match = re.search(
+        r"(\d{8})",
+        csv_path.stem,
+    )
+
+    if not match:
+        return None
+
+    daily_output = (
+        csv_path.parent
+        / "postprocessing"
+        / f"{match.group(1)}_postprocessed.csv"
+    )
+
+    if daily_output.is_file():
+        return str(daily_output)
+
+    return None
 def add_night_column(hour_column, day_name):
     
     night_list = {

@@ -37,7 +37,7 @@ def process_single_csv( csv_path,device,folder,yamnet_df,yamnet_csv,oca_limits,l
     if m: day_hour = m.group(0)
     else: logger.error(f"Could not find YYYYMMDD_HH pattern in filename {filename}, using full stem")
 
-    output_path                     = os.path.join(post_dir, f"{day_hour}_postpo.csv")
+    
     output_path_graphics_alarms     = os.path.join(post_dir,day_hour,'GRAPHICS_ALARMS')
     output_path_ai_alarms           = os.path.join(post_dir,day_hour,'AI_Alarms')
     output_path_day                 = os.path.join(post_dir,day_hour)
@@ -106,7 +106,7 @@ def process_single_csv( csv_path,device,folder,yamnet_df,yamnet_csv,oca_limits,l
 
     # ------------------------- Añadir columna datetime --------------------------------------------- #
 
-    df.to_csv(output_path, index=False)
+    
     try:
         if df is None:
             logger.exception(f"DF from {csv_path} is none")
@@ -248,13 +248,131 @@ def process_single_csv( csv_path,device,folder,yamnet_df,yamnet_csv,oca_limits,l
 
     # ------------------------- Guardado de CSV ----------------------------------------------------------- #
 
+    daily_output_path                     = os.path.join(post_dir, f"{day_hour}_postpo.csv")
+    
+    daily_output_df = df_predictions_plot.copy()
 
-    df_alarms_1h.to_csv(alarms_csv_path,mode="a" if not write_header else "w",header = write_header,index=False)
+    daily_output_df.to_csv(daily_output_path,index=False)
+
+    logger.info(f"Saved daily postprocessed file {daily_output_path}")
+    
+    df_alarms_1h.to_csv(alarms_csv_path,mode="w",header = True,index=False)
 
 
+def process_weekly(daily_results,device,output_dir,taxonomy_map,logger,require_complete_week = False):
+
+    daily_results = [str(path) for path in daily_results]
+
+    if not daily_results: 
+        logger.info(f"No daily results available for weekly processing: {device}")
+        return []
+    
+    weekly_groups = group_daily_results_by_week(daily_results,logger)
+
+    generated_weekly_dirs = []
+
+    for week_start, week_paths in sorted(weekly_groups.items()):
+
+        week_end = week_start + pd.Timedelta(days=6)
+        frames = []
+        loaded_dates =set()
+
+        for path in sorted(week_paths):
+            
+            try:
+                frame = pd.read_csv(path)
+            except Exception:
+                logger.Exception(f"Failed reading daily result for weekly report {path}")
+                continue
+
+            frame = ensure_timestamp_column(frame,logger)
+
+            if frame is None or frame.empty:
+                logger.warning(f"Daily result has no valid timestamps {path}")
+                continue
+
+            frame['Timestamp'] = pd.to_datetime(frame['Timestamp'],errors='coerce')
+
+            frame = frame.dropna(subset=['Timestamp']).copy()
+
+            if frame.empty:continue 
+
+            frame_dates = (frame['Timestamp'].dt.normalize().dt.date.unique()) 
+
+            loaded_dates.update(frame_dates)
+
+            frame['source_daily_file'] = Path(path).name
+            frames.append(frame)
+
+        if not frames:
+            logger.warning(f"No valid daily frames for a week starting {week_start.date()}")
+            continue
+        if require_complete_week and len(loaded_dates) < 7:
+            logger.warning(f"Skipping incomplete week {week_start.date()} for {device}: {len(loaded_dates)}/7 days")
+            continue
+
+        weekly_df = pd.concat(frames,ignore_index=True,sort=False)
+        weekly_df = ensure_timestamp_column(weekly_df,logger)
+
+        if weekly_df is None or weekly_df.empty:
+            continue
+
+        next_week_start = week_start + pd.Timedelta(days=7)
+
+        weekly_df = weekly_df[(weekly_df['Timestamp'] >= week_start) & (weekly_df['Timestamp'] < next_week_start)].copy()
+
+        if weekly_df.empty:
+            logger.warning(f"Weekly dataframe became empty for {week_start.date()}")
+            continue
+
+        duplicate_keys = [column for column in ('Timestamp','Filename') if column in weekly_df.columns]
+
+        if duplicate_keys: weekly_df = (weekly_df.sort_values('Timestamp').drop_duplicates(subset=duplicate_keys,keep='last'))
+
+        weekly_output_dir = Path(output_dir)/'weekly'/(f"{week_start:%Y%m%d}_{week_end:%Y%m%d}")
+        weekly_graphics_dir = weekly_output_dir / 'GRAPHICS_ALARMS'
+        weekly_ai_dir = weekly_graphics_dir / 'AI_ALARMS'
+
+        weekly_output_dir.mkdir(parents=True,exist_ok=True)
+        weekly_graphics_dir.mkdir(parents=True,exist_ok=True)
+        weekly_ai_dir.mkdir(parents=True,exist_ok=True)
+
+        weekly_csv_path = weekly_output_dir / f"{device}_weekly_data.csv"
+
+        weekly_df.to_csv(weekly_csv_path,index=False)
+
+        logger.info(f"Generating weekly report for {device}: {week_start.date()} -> {week_end.date()} \n {len(weekly_df)} rows from {len(loaded_dates)} days.")
+
+        weekly_time_df = weekly_df.copy()
+        weekly_time_df['Timestamp'] = pd.to_datetime(weekly_time_df['Tiemstamp'],errors='coerce')
+        weekly_time_df = weekly_time_df.dropna(subset=['Timestamp'])
+        weekly_time_df = weekly_time_df.set_index('Timestamp',drop=False)
+
+        plot_name = (f"{device}_{week_start:%Y%m%d}_{week_end:%Y%m%d}")
+
+        try:
+            plot_night_evolution_week(weekly_df.copy(),str(week_graphics_dir),logger,laeq_column='LA_corrected',plotname=plot_name,indicador_noche='Ln')
+        except Exception:
+            logger.exception("Failed weekly night evolution for %s, week %s",device,week_start.date())
+
+        try:
+            plot_night_evolution_15_min_week(weekly_df.copy(),str(week_graphics_dir),logger,name_extension='15min',laeq_column='LA_corrected',plotname=plot_name,indicador_noche='Ln')
+        except Exception:
+            logger.exception("Failed weekly 15-minute week evolution for %s, week %s",device,week_start.date())
+
+        try:
+            plot_predic_peak_laeq_mean(weekly_df.copy(),taxonomy_map,str(weekly_ai_dir),logger,plotname=plot_name)
+        except Exception:
+            logger.exception("Failed weekly prediction report for %s, week %s",device,week_start.date())
+
+        generated_weekly_dirs.append(str(weekly_output_dir))
+
+    return generated_weekly_dirs
+
+        
 
 
-def process_all_folders(folders,day_devices,yamnet_csv,oca_limits, logger):
+def process_all_folders(folders,day_devices,yamnet_csv,taxonomy_map,oca_limits, logger):
 
     folders_by_device = {Path(folder).parent.name: Path(folder) for folder in folders}
     yamnet_df = yamnet_csv[["display_name","NoisePort_Level_1"]]
@@ -284,10 +402,6 @@ def process_all_folders(folders,day_devices,yamnet_csv,oca_limits, logger):
     #                                                                #
     # +------------------------------------------------------------+ #
 
-    # ------------------------- Comprobar si el dispositivo completo ya fue procesado ------------------------ #
-        if device_state.get("processed",False): 
-            logger.info(f"Skipping device {device}:all CSV files are already processed")
-            continue
     
     # ------------------------- Comprobar si hay una carpeta creada para el disp ----------------------------- #
         folder = folders_by_device.get(device)
@@ -301,17 +415,26 @@ def process_all_folders(folders,day_devices,yamnet_csv,oca_limits, logger):
         if not csv_states:
             logger.warning(f"No CSV files registered for device: {device}")
             continue
-    # ------------------------- LOOP device[csv_files] ------------------------------------------------------- #        
+    # ------------------------- LOOP device[csv_files] ------------------------------------------------------- #
+        daily_results = []        
         for csv_state in csv_states:
+            csv_path = Path(csv_state['path'])
+
+            if not csv_path.is_absolute():
+                csv_path = folder / csv_path
     # ------------------------- Comprobar el csv ya fue procesado -------------------------------------------- # 
             if csv_state.get("processed",False):
+                existing_result = find_daily_output_for_csv(csv_path)
+                if existing_result is not None:
+                    daily_results.append(existing_result)
+
                 logger.info(f"Skipping already processed CSV: {csv_state['path']}")
                 continue
             csv_path = Path(csv_state['path'])
             if not csv_path.is_absolute(): csv_path = folder / csv_path
     # ------------------------- Procesar CSV ------------------------------------------------------------------ # 
             try:
-                process_single_csv(
+                daily_result = process_single_csv(
                     csv_path    = csv_path,
                     device      = device,
                     folder      = folder,
@@ -326,6 +449,7 @@ def process_all_folders(folders,day_devices,yamnet_csv,oca_limits, logger):
             else:
     # ------------------------- Si no da error se marca como procesado  --------------------------------------- #
                 csv_state['processed']  =   True
+                if daily_result: daily_results.append(daily_result)
     # ------------------------- device['processed] = True si todos sus csvs procesados ------------------------ #
         device_state["processed"] = (
             bool(csv_states)
@@ -334,7 +458,23 @@ def process_all_folders(folders,day_devices,yamnet_csv,oca_limits, logger):
                 for csv_state in csv_states
             )
         )
+
+        stored_daily_results = sorted(folder / "postprocessing").glob("*_postprocessed.csv")
+        all_daily_results = sorted({str(path) for path in (list(stored_daily_results) + [Path(path) for path in daily_results])})
+
+        try:
+            process_weekly(
+                daily_results           = all_daily_results,
+                device                  = device,
+                output_dir              = folder / 'postprocessing',
+                taxonomy_map            = taxonomy_map,
+                logger                  = logger,
+                require_complete_week   = False
+                )
+        except Exception:
+            logger.Exception("Weekly processing failed for device %s",device)
+
         if device_state["processed"]: logger.info(f"Device: {device} has been entirely processed until now.")
         else: logger.warning(f"Device {device} has pending processing or something failed.")
 
-        return day_devices
+    return day_devices
