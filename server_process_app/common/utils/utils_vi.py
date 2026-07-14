@@ -231,7 +231,7 @@ def find_daily_output_for_csv(csv_path):
     daily_output = (
         csv_path.parent
         / "postprocessing"
-        / f"{match.group(1)}_postprocessed.csv"
+        / f"{match.group(1)}_postpo.csv"
     )
 
     if daily_output.is_file():

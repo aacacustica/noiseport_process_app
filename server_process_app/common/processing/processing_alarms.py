@@ -282,7 +282,7 @@ def process_weekly(daily_results,device,output_dir,taxonomy_map,logger,require_c
             try:
                 frame = pd.read_csv(path)
             except Exception:
-                logger.Exception(f"Failed reading daily result for weekly report {path}")
+                logger.exception(f"Failed reading daily result for weekly report {path}")
                 continue
 
             frame = ensure_timestamp_column(frame,logger)
@@ -331,7 +331,7 @@ def process_weekly(daily_results,device,output_dir,taxonomy_map,logger,require_c
 
         weekly_output_dir = Path(output_dir)/'weekly'/(f"{week_start:%Y%m%d}_{week_end:%Y%m%d}")
         weekly_graphics_dir = weekly_output_dir / 'GRAPHICS_ALARMS'
-        weekly_ai_dir = weekly_graphics_dir / 'AI_ALARMS'
+        weekly_ai_dir = weekly_output_dir / 'AI_ALARMS'
 
         weekly_output_dir.mkdir(parents=True,exist_ok=True)
         weekly_graphics_dir.mkdir(parents=True,exist_ok=True)
@@ -344,24 +344,24 @@ def process_weekly(daily_results,device,output_dir,taxonomy_map,logger,require_c
         logger.info(f"Generating weekly report for {device}: {week_start.date()} -> {week_end.date()} \n {len(weekly_df)} rows from {len(loaded_dates)} days.")
 
         weekly_time_df = weekly_df.copy()
-        weekly_time_df['Timestamp'] = pd.to_datetime(weekly_time_df['Tiemstamp'],errors='coerce')
+        weekly_time_df['Timestamp'] = pd.to_datetime(weekly_time_df['Timestamp'],errors='coerce')
         weekly_time_df = weekly_time_df.dropna(subset=['Timestamp'])
         weekly_time_df = weekly_time_df.set_index('Timestamp',drop=False)
 
         plot_name = (f"{device}_{week_start:%Y%m%d}_{week_end:%Y%m%d}")
 
         try:
-            plot_night_evolution_week(weekly_df.copy(),str(week_graphics_dir),logger,laeq_column='LA_corrected',plotname=plot_name,indicador_noche='Ln')
+            plot_night_evolution_week(weekly_df.copy(),str(weekly_graphics_dir),logger,laeq_column='LA_corrected',plotname=plot_name,indicador_noche='Ln')
         except Exception:
             logger.exception("Failed weekly night evolution for %s, week %s",device,week_start.date())
 
         try:
-            plot_night_evolution_15_min_week(weekly_df.copy(),str(week_graphics_dir),logger,name_extension='15min',laeq_column='LA_corrected',plotname=plot_name,indicador_noche='Ln')
+            plot_night_evolution_15_min_week(weekly_time_df.copy(),str(weekly_graphics_dir),logger,name_extension='15min',laeq_column='LA_corrected',plotname=plot_name,indicador_noche='Ln')
         except Exception:
             logger.exception("Failed weekly 15-minute week evolution for %s, week %s",device,week_start.date())
 
         try:
-            plot_predic_peak_laeq_mean(weekly_df.copy(),taxonomy_map,str(weekly_ai_dir),logger,plotname=plot_name)
+            plot_predic_peak_laeq_mean_week(weekly_df.copy(),taxonomy_map,str(weekly_ai_dir),logger,plotname=plot_name)
         except Exception:
             logger.exception("Failed weekly prediction report for %s, week %s",device,week_start.date())
 
@@ -458,8 +458,9 @@ def process_all_folders(folders,day_devices,yamnet_csv,taxonomy_map,oca_limits, 
                 for csv_state in csv_states
             )
         )
+        postprocessing_dir = folder / "postprocessing"
+        stored_daily_results = sorted(postprocessing_dir.glob("*_postpo.csv"))
 
-        stored_daily_results = sorted(folder / "postprocessing").glob("*_postprocessed.csv")
         all_daily_results = sorted({str(path) for path in (list(stored_daily_results) + [Path(path) for path in daily_results])})
 
         try:
@@ -472,7 +473,7 @@ def process_all_folders(folders,day_devices,yamnet_csv,taxonomy_map,oca_limits, 
                 require_complete_week   = False
                 )
         except Exception:
-            logger.Exception("Weekly processing failed for device %s",device)
+            logger.exception("Weekly processing failed for device %s",device)
 
         if device_state["processed"]: logger.info(f"Device: {device} has been entirely processed until now.")
         else: logger.warning(f"Device {device} has pending processing or something failed.")
