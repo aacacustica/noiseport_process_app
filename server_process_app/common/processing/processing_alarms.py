@@ -291,7 +291,7 @@ def process_weekly(daily_results,device,output_dir,taxonomy_map,logger,require_c
                 logger.warning(f"Daily result has no valid timestamps {path}")
                 continue
 
-            frame['Timestamp'] = pd.to_datetime(frame['Timestamp'],errors='coerce')
+            frame['Timestamp'] = pd.to_datetime(frame['Timestamp'],errors='coerce',utc=True).dt.tz_localize(None)
 
             frame = frame.dropna(subset=['Timestamp']).copy()
 
@@ -314,9 +314,13 @@ def process_weekly(daily_results,device,output_dir,taxonomy_map,logger,require_c
         weekly_df = pd.concat(frames,ignore_index=True,sort=False)
         weekly_df = ensure_timestamp_column(weekly_df,logger)
 
+        
+
         if weekly_df is None or weekly_df.empty:
             continue
 
+        weekly_df['Timestamp'] = pd.to_datetime(weekly_df['Timestamp'],errors='coerce',utc=True).dt.tz_localize(None)    
+        
         next_week_start = week_start + pd.Timedelta(days=7)
 
         weekly_df = weekly_df[(weekly_df['Timestamp'] >= week_start) & (weekly_df['Timestamp'] < next_week_start)].copy()
