@@ -196,8 +196,6 @@ def plot_night_evolution_week(df, folder_output_dir: str, logger, laeq_column: s
 
 def plot_night_evolution_15_min(df, folder_output_dir: str, logger, name_extension, laeq_column:str, plotname:str, indicador_noche:str):
     try:
-        print(df)
-        print(df.columns)
         
         df = df.dropna(subset=[laeq_column])
         logger.info(f"Using the laeq_column: {laeq_column}")        
@@ -223,11 +221,6 @@ def plot_night_evolution_15_min(df, folder_output_dir: str, logger, name_extensi
         
         # convert time column to a plottable format with a 15-minute offset
         df_resampled['plot_time'] = [(t.hour * 60 + t.minute - 15) - (23 * 60) if t.hour >= 23 else (t.hour * 60 + t.minute - 15) + 60 for t in df_resampled['time']]
-        print(df_resampled)
-        print(df_resampled.columns)
-        print(df_resampled['plot_time'])
-        exit()
-        
 
         # filter data
         unique_dates = pd.to_datetime(df_resampled.index.date).unique()
@@ -455,6 +448,10 @@ def plot_predic_laeq_mean_4h(df_all_yamnet: pd.DataFrame,df_ship_dock: pd.DataFr
     try:
         df_all = df_all_yamnet.copy()
         df_all['Timestamp'] = pd.to_datetime(df_all['Timestamp'], errors='coerce')
+
+        df_all = ensure_timestamp_column(df_all,logger)
+        if df_all is None or df_all.empty: return
+
         df_all = df_all.dropna(subset=['LA_corrected'])
         df_all.set_index('Timestamp', inplace=True)
 
@@ -526,7 +523,10 @@ def plot_predic_laeq_mean_day(df_all_yamnet: pd.DataFrame, df_ship_dock:pd.DataF
 
 
         df_all = df_all_yamnet.copy()
-        df_all['Timestamp'] = pd.to_datetime(df_all['Timestamp'], errors='coerce')
+
+        df_all = ensure_timestamp_column(df_all,logger)
+        if df_all is None or df_all.empty: return
+
         df_all = df_all.dropna(subset=['LA_corrected'])
         df_all.set_index('Timestamp', inplace=True)
 
@@ -585,7 +585,24 @@ def plot_predic_laeq_mean_day(df_all_yamnet: pd.DataFrame, df_ship_dock:pd.DataF
 def plot_predic_laeq_mean_week(df_all_yamnet: pd.DataFrame, taxonomy_map: dict, folder_output_dir: str, logger, plotname: str):
     try:
         df_all_yamnet = df_all_yamnet.copy()
-        df_all_yamnet['Timestamp'] = pd.to_datetime(df_all_yamnet['Timestamp'])
+
+        required_columns = {'class','LA_corrected'}
+        missing = sorted(required_columns - set(df_all_yamnet.columns))
+
+        if missing: 
+            logger.warning(f"Skipping prediction LAeq plot; missing columns {missing}. Available columns {df_all_yamnet.columns.to_list()}")
+            return
+        
+        df_all_yamnet['LA_corrected'] = pd.to_numeric(df_all_yamnet['LA_corrected'],errors='coerce')
+        df_all_yamnet = df_all_yamnet.dropna(subset=['class','LA_corrected']).copy()
+        
+        if df_all_yamnet.empty:
+            logger.warning(f"Skipping prediction LAeq plot: no valid prediction rows")
+            return
+        
+        df_all_yamnet = ensure_timestamp_column(df_all_yamnet,logger)
+        if df_all_yamnet is None or df_all_yamnet.empty: return
+
         try:
             df_all_yamnet['week'] = df_all_yamnet['Timestamp'].dt.to_period('W').start_time
         except Exception as e:
@@ -601,6 +618,10 @@ def plot_predic_laeq_mean_week(df_all_yamnet: pd.DataFrame, taxonomy_map: dict, 
             color_palet = COLOR_PALLET_URBAN
             logger.info("Using 'Brown_Level_2' class for plotting")
 
+        if class_to_plot not in df_all_yamnet.columns:
+            logger.warning(f"Skipping prediction LAeq mean plot: taxonomy column {class_to_plot} not present in available columns: {df_all_yamnet.columns.to_list()}")
+            return
+        
         class_column = 'class'
         weeks = df_all_yamnet['week'].unique()
 
@@ -1396,7 +1417,9 @@ def plot_prediction_map_new_week(df_all_yamnet: pd.DataFrame, taxonomy_map: dict
     try:
         df_copy = df_all_yamnet.copy()
         df_copy = add_datetime_columns(df_copy, logger, date_col='Timestamp')
-        df_copy['Timestamp'] = pd.to_datetime(df_copy['Timestamp'])
+        
+        df_copy = ensure_timestamp_column(df_copy,logger)
+        if df_copy is None or df_copy.empty: return
 
         df_copy['mapped_class'] = df_copy['class'].map(taxonomy_map)
         df_copy = df_copy.dropna(subset=['mapped_class'])
@@ -4491,7 +4514,10 @@ def plot_predic_peak_laeq_mean(df_all_yamnet: pd.DataFrame, taxonomy_map: dict, 
 def plot_predic_peak_laeq_mean_week(df_all_yamnet: pd.DataFrame, taxonomy_map: dict, folder_output_dir: str, logger, plotname: str):
     try:
         df_all_yamnet = df_all_yamnet[df_all_yamnet['is_peak'] == 1].copy()
-        df_all_yamnet['Timestamp'] = pd.to_datetime(df_all_yamnet['Timestamp'])
+        
+        df_all_yamnet = ensure_timestamp_column(df_all_yamnet,logger)
+        if df_all_yamnet is None or df_all_yamnet.empty: return
+        
         try:
             df_all_yamnet['week'] = df_all_yamnet['Timestamp'].dt.to_period('W').start_time
         except Exception as e:
@@ -4609,7 +4635,24 @@ def plot_box_plot_prediction_week(df_all_yamnet: pd.DataFrame, taxonomy_map: dic
         
         sns.set_style("whitegrid")
         df_all_yamnet = df_all_yamnet[df_all_yamnet['is_peak'] == 1].copy()
-        df_all_yamnet['Timestamp'] = pd.to_datetime(df_all_yamnet['Timestamp'])
+        
+        required_columns = ['NoisePort_Level_1','LA_corrected']
+        missing = [column for column in required_columns if column not in df_all_yamnet.columns]
+
+        if missing:
+            logger.warning(f"Skipping box plot; missing column {missing}. Available columns: {df_all_yamnet.columns.to_list()} ")
+            return
+        
+        df_all_yamnet['LA_corrected'] = pd.to_numeric(df_all_yamnet['LA_corrected'],errors='coerce')
+        df_all_yamnet = df_all_yamnet.dropna(subset=required_columns).copy()
+        
+        if df_all_yamnet.empty:
+            logger.warning(f"Skipping box plot; no classified prediction data")
+            return
+        
+        df_all_yamnet = ensure_timestamp_column(df_all_yamnet,logger)
+        if df_all_yamnet is None or df_all_yamnet.empty: return
+        
         try:
             df_all_yamnet['week'] = df_all_yamnet['Timestamp'].dt.to_period('W').start_time
         except Exception as e:
@@ -4653,7 +4696,10 @@ def plot_heat_map_prediction(df_all_yamnet: pd.DataFrame, taxonomy_map: dict, fo
     try:
        
         df_all_yamnet = df_all_yamnet[df_all_yamnet['is_peak'] == 1].copy()
-        df_all_yamnet['Timestamp'] = pd.to_datetime(df_all_yamnet['Timestamp'])
+
+        df_all_yamnet = ensure_timestamp_column(df_all_yamnet,logger)
+        if df_all_yamnet is None or df_all_yamnet.empty: return
+
         try:
             df_all_yamnet['week'] = df_all_yamnet['Timestamp'].dt.to_period('W').start_time
         except Exception as e:
@@ -4710,7 +4756,9 @@ def plot_heat_map_prediction_week(df_all_yamnet: pd.DataFrame, taxonomy_map: dic
     try:
         folder_output_dir.join(MERGED_FOLDER)
         df_all_yamnet = df_all_yamnet[df_all_yamnet['is_peak'] == 1].copy()
-        df_all_yamnet['Timestamp'] = pd.to_datetime(df_all_yamnet['Timestamp'])
+        
+        df_all_yamnet = ensure_timestamp_column(df_all_yamnet,logger)
+        if df_all_yamnet is None or df_all_yamnet.empty: return
 
         try:
             df_all_yamnet['week'] = df_all_yamnet['Timestamp'].dt.to_period('W').start_time

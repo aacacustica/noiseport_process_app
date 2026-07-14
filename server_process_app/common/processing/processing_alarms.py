@@ -83,7 +83,8 @@ def process_single_csv( csv_path,device,folder,yamnet_df,yamnet_csv,oca_limits,l
         df = df.drop(columns=cols_to_drop)
     
     if "LC" in df.columns and "LA" in df.columns: df["LC-LA"] = df["LC"] - df["LA"]
-    
+    if 'LA_corrected' not in df.columns and 'LA' in df.columns: df['LA_corrected'] = pd.to_numeric(df['LA'],errors='coerce')
+    else: df['LA_corrected'] = pd.to_numeric(df['LA_corrected'],errors='coerce')
 
     if "NoisePort_Level_1" in df.columns: taxonomy_cols = ["NoisePort_Level_1"]
 
@@ -147,21 +148,32 @@ def process_single_csv( csv_path,device,folder,yamnet_df,yamnet_csv,oca_limits,l
     try:
 
         if "Prediction_1" in df.columns and "Prob_1" in df.columns:
-            duplicated_columns = df.columns[df.columns.duplicated()].tolist()
-            if duplicated_columns:
+            duplicated_columns = (df.columns[df.columns.duplicated()].tolist())
+
+            if duplicated_columns: 
                 logger.warning(f"Removing duplicated columns: {duplicated_columns}")
                 df = df.loc[:, ~df.columns.duplicated()].copy()
-
-            mask = df["Prob_1"] >= probability_threshold
+            
+            df['Prob_1'] = pd.to_numeric(df['Prob_1'],errors='coerce')
+            mask = df['Prob1'] >= probability_threshold
             df['class'] = df['Prediction_1']
-            taxonomy_cols = [column for column in ("class","NoisePort_Level_1") if column in df.columns]
-            cols_to_clear = ["Prediction_1","Prob_1"]
-            if "NoisePort_Level_1" in df.columns: cols_to_clear.append("Noise_Port_Level_1")
+            cols_to_clear = [column for column in ('Prediction_1','Prob_1','class','NoisePort_Level_1')]
             df.loc[~mask, cols_to_clear] = pd.NA
+
         else:
-            logger.warning(f"Prediction_1 or Prob_1 columns not found in df from: {csv_path}")
+            logger.warning(f"Prediction_1 or Prob_1 columns not found in {csv_path} ")
 
     except Exception as e: logger.exception(f" Exception while processing predictions file:{e}")
+
+    # ------------------------- Dataframe para AI_ALARMS ----------------------------------------- #
+
+    df_predictions_plot = df.copy()
+
+    if 'Timestamp' not in df_predictions_plot.columns:
+        if isinstance(df_predictions_plot.index,pd.DatetimeIndex): df_predictions_plot = (df_predictions_plot.reset_index().rename(columns={'datetime': 'Timestamp'}))
+        else: df_predictions_plot['Timestamp'] = pd.to_datetime(df_predictions_plot['Timestamp'],errors='coerce')
+    
+    df_predictions_plot['LA_corrected'] = pd.to_numeric(df_predictions_plot['LA_corrected'],errors='coerce')
 
     # ------------------------- Transformar a datos de una hora ----------------------------------------- #
 
@@ -222,13 +234,13 @@ def process_single_csv( csv_path,device,folder,yamnet_df,yamnet_csv,oca_limits,l
     try: plot_density_distribution_peaks(df_alarms_1h, output_path_graphics_alarms, logger, plotname="density")
     except Exception as e: logger.exception(f"Exception while plotting density distribution peaks: {e} in file {csv_path}")
 
-    try: plot_predic_peak_laeq_mean(df_alarms_1h,yamnet_csv, output_path_ai_alarms, logger, plotname="predic")
+    try: plot_predic_peak_laeq_mean(df_predictions_plot,yamnet_csv, output_path_ai_alarms, logger, plotname="predic")
     except Exception as e: logger.exception(f"Exception while plotting prediction peak laeq mean: {e} in file {csv_path}")
 
-    try: plot_box_plot_prediction(df_alarms_1h,yamnet_csv, output_path_ai_alarms, logger, plotname="box")
+    try: plot_box_plot_prediction(df_predictions_plot,yamnet_csv, output_path_ai_alarms, logger, plotname="box")
     except Exception as e: logger.exception(f"Exception while plotting box plot prediction: {e} in file {csv_path}")
 
-    try: plot_heat_map_prediction(df_alarms_1h,yamnet_csv, output_path_ai_alarms, logger, plotname="heat map predic")
+    try: plot_heat_map_prediction(df_predictions_plot,yamnet_csv, output_path_ai_alarms, logger, plotname="heat map predic")
     except Exception as e: logger.exception(f"Exception while plotting heat map prediction: {e} in file {csv_path}")
 
     # ------------------------- Guardado de CSV ----------------------------------------------------------- #

@@ -162,6 +162,27 @@ def evaluation_period_str_valencia(hour_column):
         period = 'Ln_valencia'
     return period
 
+def ensure_timestamp_column(df: pd.DataFrame,logger) -> pd.DataFrame | None:
+    result = df.copy()
+
+    if 'Timestamp' in result.columns:
+        result['Timestamp'] = pd.to_datetime(result['Timestamp'],errors='coerce')
+    elif isinstance(result.index,pd.DatetimeIndex):
+        index_name = result.index.name or 'index'
+        
+        result = result.reset_index()
+        result = result.rename(columns={index_name:'Timestamp'})
+        result['Timestamp'] = pd.to_datetime(result['Timestamp'],errors='coerce')
+
+    elif 'datetime' in result.columns:
+        result['Timestamp'] = pd.to_datetime(result['datetime'],errors='coerce')
+    else:
+        logger.warning(f"Timestamp unavailable. Columns: {result.columns.to_list()}")
+        return None
+    
+    result = result.dropna(subset='Timestamp').copy()
+
+    return result
 
 def add_night_column(hour_column, day_name):
     
