@@ -8,6 +8,7 @@ import json
 
 from pathlib import Path
 from pandas.api.types import is_datetime64_any_dtype
+from typing import Optional
 
 from server_process_app.common.config.config_vi import *
 from server_process_app.common.utils.utils import * 
@@ -162,11 +163,7 @@ def evaluation_period_str_valencia(hour_column):
         period = 'Ln_valencia'
     return period
 
-def ensure_timestamp_column(
-    df: pd.DataFrame,
-    logger,
-) -> pd.DataFrame | None:
-    result = df.copy()
+def ensure_timestamp_column(df: pd.DataFrame,logger): 
 
     if 'Timestamp' in result.columns:
         result['Timestamp'] = pd.to_datetime(result['Timestamp'],errors='coerce')
