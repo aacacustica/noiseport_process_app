@@ -165,6 +165,7 @@ def evaluation_period_str_valencia(hour_column):
 
 def ensure_timestamp_column(df: pd.DataFrame,logger): 
 
+    result = df.copy()
     if 'Timestamp' in result.columns:
         result['Timestamp'] = pd.to_datetime(result['Timestamp'],errors='coerce')
     elif isinstance(result.index,pd.DatetimeIndex):
