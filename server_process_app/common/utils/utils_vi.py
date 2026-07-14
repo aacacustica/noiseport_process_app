@@ -181,7 +181,7 @@ def ensure_timestamp_column(df: pd.DataFrame,logger):
         logger.warning(f"Timestamp unavailable. Columns: {result.columns.to_list()}")
         return None
     
-    result = result.dropna(subset='Timestamp').copy()
+    result = result.dropna(subset=['Timestamp']).copy()
 
     return result
 

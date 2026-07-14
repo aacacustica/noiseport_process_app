@@ -169,9 +169,12 @@ def process_single_csv( csv_path,device,folder,yamnet_df,yamnet_csv,oca_limits,l
 
     df_predictions_plot = df.copy()
 
-    if 'Timestamp' not in df_predictions_plot.columns:
-        if isinstance(df_predictions_plot.index,pd.DatetimeIndex): df_predictions_plot = (df_predictions_plot.reset_index().rename(columns={'datetime': 'Timestamp'}))
-        else: df_predictions_plot['Timestamp'] = pd.to_datetime(df_predictions_plot['Timestamp'],errors='coerce')
+    df_predictions_plot = ensure_timestamp_column(df,logger)
+    
+    if (df_predictions_plot is None or df_predictions_plot.empty):
+        logger.warning(f"Canot prepare prediction plot dataframe for {csv_path}")
+        return
+    
     
     df_predictions_plot['LA_corrected'] = pd.to_numeric(df_predictions_plot['LA_corrected'],errors='coerce')
 
